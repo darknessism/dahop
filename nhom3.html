@@ -1,0 +1,1498 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DA HOP - Back-Office Command Terminal</title>
+    
+    <!-- Fonts: Inter (Sans) & JetBrains Mono (Monospace for Finance) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        bg_main: '#050505',
+                        bg_surface: '#0a0a0a',
+                        bg_panel: '#111111',
+                        border_line: 'rgba(255,255,255,0.08)', 
+                        semantic: {
+                            success: '#00df82', // Neon Green
+                            danger: '#ef4444', // Red
+                            warning: '#f59e0b', // Orange
+                            info: '#3b82f6', // Blue
+                        },
+                        sector: {
+                            ind: '#06b6d4', // Cyan for Industrial
+                            res: '#D4AF37', // Gold for Residential
+                            off: '#a855f7', // Purple for Office
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            background-color: #050505;
+            color: #e5e7eb;
+            overflow: hidden; 
+        }
+
+        /* Glassmorphism & Surface */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* High-Density Tables (Dark Mode) */
+        table { border-collapse: collapse; width: 100%; }
+        th { 
+            background-color: #111; 
+            font-weight: 600; 
+            text-transform: uppercase; 
+            letter-spacing: 0.05em; 
+            font-size: 0.65rem; 
+            color: #9ca3af; 
+            padding: 8px 12px; 
+            text-align: left; 
+            border-bottom: 1px solid rgba(255,255,255,0.1); 
+            position: sticky; top: 0; z-index: 10;
+        }
+        td { 
+            padding: 8px 12px; 
+            font-size: 0.75rem; 
+            border-bottom: 1px solid rgba(255,255,255,0.05); 
+            vertical-align: middle; 
+        }
+        tr:hover td { background-color: rgba(255,255,255,0.03); }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
+
+        /* Interactive Map Mockup (Dark Mode) */
+        .floor-map-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 4px;
+        }
+        .room-cell {
+            aspect-ratio: 1;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            background-color: rgba(255,255,255,0.02);
+            color: #9ca3af;
+        }
+        .room-cell:hover { border-color: rgba(255,255,255,0.3); color: #fff; }
+        
+        /* Gantt Chart Mockup */
+        .gantt-row { display: grid; grid-template-columns: 180px 1fr; border-bottom: 1px solid rgba(255,255,255,0.05); align-items: center;}
+        .gantt-timeline { display: grid; grid-template-columns: repeat(12, 1fr); gap: 2px; padding: 4px 0;}
+        .gantt-bar { border-radius: 4px; padding: 2px 8px; font-size: 0.65rem; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; font-weight: 500;}
+
+        /* Sidebar Active State */
+        .sidebar-active {
+            background-color: rgba(59, 130, 246, 0.1); 
+            color: var(--active-color, #3b82f6);
+            border-right: 3px solid var(--active-color, #3b82f6);
+        }
+        .sidebar-item { border-right: 3px solid transparent; }
+        .sidebar-item:hover { color: var(--active-color, #3b82f6); }
+        
+        /* KCN Dashboard Specific Animations */
+        .cyber-glow { box-shadow: 0 0 15px rgba(6, 182, 212, 0.2), inset 0 0 10px rgba(6, 182, 212, 0.1); border-color: rgba(6, 182, 212, 0.3); }
+        .alert-glow { box-shadow: 0 0 20px rgba(239, 68, 68, 0.4), inset 0 0 10px rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.6); animation: pulse-border 2s infinite; }
+        @keyframes pulse-border { 0%, 100% { border-color: rgba(239, 68, 68, 0.6); } 50% { border-color: rgba(239, 68, 68, 0.2); } }
+
+        /* Scan Animation for eKYC */
+        @keyframes scan { 0%, 100% { top: 0; } 50% { top: 100%; } }
+    </style>
+</head>
+<body class="h-screen w-screen flex font-sans antialiased" style="--active-color: #3b82f6;">
+
+    <!-- Compact Sidebar -->
+    <aside class="w-24 md:w-64 border-r border-brand-border bg-[#0a0a0a] flex flex-col items-center md:items-start py-8 px-4 shrink-0 transition-all z-20 shadow-2xl">
+        <div class="mb-10 w-full flex flex-col items-center md:items-start md:px-4">
+            <h1 class="font-serif text-2xl md:text-3xl font-bold tracking-widest text-brand-gold hidden md:block">DA HOP</h1>
+            <h1 class="font-serif text-2xl font-bold tracking-widest text-brand-gold block md:hidden">DH</h1>
+            <p class="text-[10px] text-gray-400 mt-1 uppercase tracking-widest hidden md:block">Super Ecosystem</p>
+        </div>
+
+            <nav class="flex flex-col mt-4" id="sidebar-nav">
+                <!-- Special KCN OS Tab -->
+                <button onclick="switchTab('kcn-dashboard')" id="nav-kcn-dashboard" class="sidebar-item h-12 flex items-center justify-center md:justify-start px-0 md:px-6 text-gray-400 hover:bg-white/5 transition-colors w-full group relative">
+                    <i data-lucide="cpu" class="w-5 h-5 transition-colors"></i>
+                    <span class="ml-3 text-sm font-medium hidden md:block">Smart IP OS (KCN)</span>
+                    
+                </button>
+
+                <!-- Omnichannel Inbox Tab -->
+                <button onclick="switchTab('inbox')" id="nav-inbox" class="sidebar-item sidebar-active h-12 flex items-center justify-center md:justify-start px-0 md:px-6 text-gray-400 hover:bg-white/5 transition-colors w-full group relative">
+                    <i data-lucide="inbox" class="w-5 h-5 transition-colors"></i>
+                    <span class="ml-3 text-sm font-medium hidden md:block">Omnichannel CRM</span>
+                    
+                </button>
+
+                <button onclick="switchTab('finance')" id="nav-finance" class="sidebar-item h-12 flex items-center justify-center md:justify-start px-0 md:px-6 text-gray-400 hover:bg-white/5 transition-colors w-full group">
+                    <i data-lucide="calculator" class="w-5 h-5 transition-colors"></i>
+                    <span class="ml-3 text-sm font-medium hidden md:block">Kế Toán & Đối Soát</span>
+                </button>
+
+                <!-- Digital Front Desk -->
+                <button onclick="switchTab('frontdesk')" id="nav-frontdesk" class="sidebar-item h-12 flex items-center justify-center md:justify-start px-0 md:px-6 text-gray-400 hover:bg-white/5 transition-colors w-full group relative">
+                    <i data-lucide="monitor-smartphone" class="w-5 h-5 transition-colors"></i>
+                    <span class="ml-3 text-sm font-medium hidden md:block">Digital Front-Desk</span>
+                </button>
+
+                <button onclick="switchTab('heatmap')" id="nav-heatmap" class="sidebar-item h-12 flex items-center justify-center md:justify-start px-0 md:px-6 text-gray-400 hover:bg-white/5 transition-colors w-full group">
+                    <i data-lucide="map" class="w-5 h-5 transition-colors"></i>
+                    <span class="ml-3 text-sm font-medium hidden md:block">Quản trị Không gian</span>
+                </button>
+
+                <button onclick="switchTab('roster')" id="nav-roster" class="sidebar-item h-12 flex items-center justify-center md:justify-start px-0 md:px-6 text-gray-400 hover:bg-white/5 transition-colors w-full group">
+                    <i data-lucide="calendar-days" class="w-5 h-5 transition-colors"></i>
+                    <span class="ml-3 text-sm font-medium hidden md:block">Trực & Điều Phối</span>
+                </button>
+            </nav>
+        </div>
+
+        <div class="p-4 border-t border-border_line flex items-center justify-center md:justify-start relative z-10 bg-bg_surface">
+            <div class="w-8 h-8 rounded bg-gray-800 text-gray-300 border border-gray-600 flex items-center justify-center font-bold text-xs shrink-0">AD</div>
+            <div class="ml-3 hidden md:block overflow-hidden">
+                <p class="text-xs font-semibold text-white truncate">Trần Ban Quản Lý</p>
+                <p class="text-[10px] text-gray-500 truncate">Giám Đốc Vận Hành</p>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden bg-bg_main relative">
+        <!-- Background Grid Pattern for Dark Tech feel -->
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMSIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjAyKSIvPjwvc3ZnPg==')] pointer-events-none opacity-50"></div>
+        
+        <!-- Global Top Header -->
+        <header class="h-16 bg-bg_surface border-b border-border_line flex items-center justify-end px-6 shrink-0 z-10 relative">
+            <div class="flex items-center space-x-4">
+                <!-- Search -->
+                <div class="relative hidden lg:block">
+                    <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+                    <input type="text" placeholder="Tìm ID nhà máy, căn hộ, vé hỗ trợ..." class="pl-9 pr-4 py-1.5 w-72 text-xs border border-gray-700 rounded bg-black text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">
+                    <div class="absolute right-2 top-1/2 transform -translate-y-1/2 text-[9px] text-gray-500 border border-gray-700 px-1 rounded bg-gray-900">Ctrl+K</div>
+                </div>
+                <div class="w-px h-6 bg-gray-800"></div>
+                <!-- Notifications -->
+                <button class="w-8 h-8 rounded flex items-center justify-center hover:bg-white/10 text-gray-400 relative">
+                    <i data-lucide="bell" class="w-4 h-4"></i>
+                    <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-semantic-danger rounded-full shadow-[0_0_8px_rgba(239,68,68,0.8)]"></span>
+                </button>
+            </div>
+        </header>
+
+        <!-- TAB CONTENT CONTAINER -->
+        <div class="flex-1 overflow-hidden relative z-10 p-4">
+
+            <!-- TAB 1: SMART IP OS (Khu Công Nghiệp) -->
+            <div id="tab-kcn-dashboard" class="tab-content hidden h-full flex flex-col gap-4 overflow-y-auto pb-8">
+                <!-- Row 1: Smart Utilities & ESG -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Energy Grid -->
+                    <div class="glass-panel p-4 rounded-xl flex flex-col cyber-glow relative overflow-hidden bg-gradient-to-br from-sector-ind/5 to-transparent">
+                        <h3 class="text-[10px] font-bold uppercase tracking-widest text-sector-ind mb-3 flex items-center"><i data-lucide="zap" class="w-3.5 h-3.5 mr-1.5"></i> Lưới Điện Thông Minh (Smart Grid)</h3>
+                        <div class="flex justify-between items-end mb-2">
+                            <div>
+                                <p class="text-2xl font-serif font-bold text-white">45.2 <span class="text-xs font-sans font-normal text-gray-400">MW</span></p>
+                                <p class="text-[10px] text-gray-500">Tổng tải KCN hiện tại</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm font-mono font-bold text-semantic-success">12.5 <span class="text-[9px] text-gray-400">MW (Solar)</span></p>
+                            </div>
+                        </div>
+                        <div class="w-full bg-gray-800 h-1.5 rounded overflow-hidden flex">
+                            <div class="bg-gray-400 h-full" style="width: 70%" title="Điện lưới (EVN)"></div>
+                            <div class="bg-semantic-success h-full" style="width: 30%" title="Năng lượng mặt trời áp mái"></div>
+                        </div>
+                    </div>
+
+                    <!-- Water IoT -->
+                    <div class="glass-panel p-4 rounded-xl flex flex-col border border-white/10 relative overflow-hidden">
+                        <div class="absolute top-2 right-2 flex items-center">
+                            <span class="flex h-2 w-2 relative mr-1"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-semantic-success opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-semantic-success"></span></span>
+                            <span class="text-[9px] font-bold text-semantic-success uppercase">Cảm biến ổn định</span>
+                        </div>
+                        <h3 class="text-[10px] font-bold uppercase tracking-widest text-blue-400 mb-3 flex items-center"><i data-lucide="droplets" class="w-3.5 h-3.5 mr-1.5"></i> Xử Lý Nước Thải IoT</h3>
+                        <div class="flex items-center space-x-4 mb-2">
+                            <div>
+                                <p class="text-[10px] text-gray-500 mb-0.5">Lưu lượng</p>
+                                <p class="text-sm font-mono font-bold text-white">1,240 <span class="text-[9px] text-gray-400">m³/h</span></p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] text-gray-500 mb-0.5">Nồng độ pH</p>
+                                <p class="text-sm font-mono font-bold text-white">7.2 <span class="text-[9px] text-gray-400">(Chuẩn)</span></p>
+                            </div>
+                        </div>
+                        <button class="mt-auto w-full py-1.5 rounded bg-white/5 border border-white/10 text-[9px] uppercase font-bold text-gray-400 hover:text-white transition-colors">Xem Báo cáo DTM</button>
+                    </div>
+
+                    <!-- Carbon Footprint -->
+                    <div class="glass-panel p-4 rounded-xl flex flex-col border border-white/10 relative overflow-hidden bg-gradient-to-b from-green-900/10 to-transparent">
+                        <h3 class="text-[10px] font-bold uppercase tracking-widest text-semantic-success mb-3 flex items-center"><i data-lucide="leaf" class="w-3.5 h-3.5 mr-1.5"></i> Dấu Chân Carbon (Scope 1&2)</h3>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-xs text-gray-300">Phát thải tháng này</span>
+                            <span class="text-xs font-mono font-bold text-white">8,450 tCO2e</span>
+                        </div>
+                        <div class="w-full bg-gray-800 h-1.5 rounded overflow-hidden mb-3"><div class="bg-semantic-success h-full" style="width: 82%"></div></div>
+                        <p class="text-[9px] text-gray-400 leading-relaxed">Đã giảm <span class="text-semantic-success font-bold">12%</span> so với cùng kỳ nhờ hệ thống Rooftop Solar và tuần hoàn nhiệt dư.</p>
+                    </div>
+
+                    <!-- Circular Economy (Waste Exchange) -->
+                    <div class="glass-panel p-4 rounded-xl flex flex-col border border-white/10 relative overflow-hidden">
+                        <h3 class="text-[10px] font-bold uppercase tracking-widest text-sector-ind mb-3 flex items-center"><i data-lucide="recycle" class="w-3.5 h-3.5 mr-1.5"></i> Sàn Giao Dịch Rác Thải (B2B)</h3>
+                        <div class="flex-1 space-y-2">
+                            <div class="bg-black/50 p-2 rounded border border-white/5 flex justify-between items-center">
+                                <div><p class="text-[10px] text-white font-medium">Cần xử lý 2 Tấn Pallet Gỗ</p><p class="text-[8px] text-gray-500">Từ: Nhà máy Foxconn (Lô B1)</p></div>
+                                <span class="text-[9px] bg-sector-ind/20 text-sector-ind px-1.5 py-0.5 rounded border border-sector-ind/30">Match 95%</span>
+                            </div>
+                            <div class="bg-black/50 p-2 rounded border border-white/5 flex justify-between items-center opacity-60">
+                                <div><p class="text-[10px] text-white font-medium">Bán 500kg bao bì Nhựa</p><p class="text-[8px] text-gray-500">Từ: Nhựa Bình Minh (Lô A2)</p></div>
+                                <span class="text-[9px] bg-gray-700 px-1.5 py-0.5 rounded">Đã giao dịch</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Row 2: 3D GIS & Security/Weighbridge -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 flex-1 min-h-[400px]">
+                    <!-- Emergency Response Center (3D GIS Map) -->
+                    <div class="lg:col-span-2 glass-panel rounded-xl flex flex-col overflow-hidden alert-glow relative">
+                        <div class="absolute top-0 left-0 w-full h-8 bg-semantic-danger/20 flex items-center px-4 border-b border-semantic-danger/40 z-20">
+                            <i data-lucide="siren" class="w-4 h-4 text-semantic-danger mr-2 animate-pulse"></i>
+                            <span class="text-[10px] font-bold text-semantic-danger uppercase tracking-widest">Trung Tâm Chỉ Huy Khẩn Cấp (Emergency Response Center)</span>
+                        </div>
+                        <div class="flex-1 bg-[#050505] relative flex items-center justify-center pt-8">
+                            <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=800&auto=format&fit=crop" class="absolute inset-0 w-full h-full object-cover opacity-20 grayscale mix-blend-screen">
+                            <div class="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] to-transparent"></div>
+                            
+                            <!-- Zones -->
+                            <div class="absolute top-[20%] left-[20%] w-32 h-32 border border-white/20 bg-white/5 rounded-lg flex items-center justify-center text-[10px] text-gray-500 font-mono">Zone A (Điện tử)</div>
+                            <div class="absolute bottom-[20%] right-[30%] w-48 h-24 border-2 border-semantic-danger bg-semantic-danger/10 rounded-lg flex items-center justify-center flex-col relative shadow-[0_0_30px_rgba(239,68,68,0.3)]">
+                                <span class="text-xs font-bold text-semantic-danger flex items-center"><i data-lucide="biohazard" class="w-4 h-4 mr-1"></i> Zone C (Hóa Chất)</span>
+                                <span class="text-[9px] text-white mt-1">Cảnh báo: Rò rỉ bồn chứa</span>
+                                <svg class="absolute -top-16 -left-20 w-32 h-32 pointer-events-none" style="filter: drop-shadow(0 0 5px #00df82);">
+                                    <path d="M 100 100 Q 50 50 10 10" fill="transparent" stroke="#00df82" stroke-width="2" stroke-dasharray="4 4" class="animate-[dash_1s_linear_infinite]" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-[#0a0a0a] border-t border-semantic-danger/30 flex justify-between items-center z-10 shrink-0">
+                            <div>
+                                <p class="text-sm font-bold text-white">Sự cố rò rỉ hóa chất Lô C4 (Nhà máy XYZ)</p>
+                                <p class="text-[10px] text-gray-400 mt-0.5">Hệ thống đã khoanh vùng sơ tán và hiển thị đường ống ngầm.</p>
+                            </div>
+                            <div class="flex space-x-3">
+                                <button class="px-4 py-2 bg-semantic-danger text-white rounded text-xs font-bold shadow-[0_0_15px_rgba(239,68,68,0.4)] flex items-center"><i data-lucide="megaphone" class="w-3.5 h-3.5 mr-1.5"></i> Phát Loa Diện Rộng</button>
+                                <button class="px-4 py-2 bg-white/10 text-white border border-white/20 rounded text-xs font-bold hover:bg-white/20 transition-colors flex items-center"><i data-lucide="power-off" class="w-3.5 h-3.5 mr-1.5"></i> Ngắt Van Tự Động</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gate Access & Weighbridge (ANPR) -->
+                    <div class="glass-panel rounded-xl flex flex-col overflow-hidden border-sector-ind/30 bg-gradient-to-b from-[#0a0a0a] to-[#111]">
+                        <div class="p-3 border-b border-border_line flex items-center justify-between">
+                            <h2 class="text-xs font-bold uppercase tracking-wider text-white flex items-center"><i data-lucide="truck" class="w-4 h-4 mr-2 text-sector-ind"></i> Trạm Cân & Cổng Chính</h2>
+                            <span class="text-[9px] bg-sector-ind/20 text-sector-ind px-2 py-0.5 rounded border border-sector-ind/30 uppercase font-bold">ANPR Active</span>
+                        </div>
+                        <div class="h-40 bg-black relative border-b border-white/10">
+                            <img src="https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?q=80&w=600&auto=format&fit=crop" class="w-full h-full object-cover opacity-50 grayscale">
+                            <div class="absolute inset-0 bg-sector-ind/10 mix-blend-overlay"></div>
+                            <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 w-32 h-10 border-2 border-sector-ind bg-black/60 backdrop-blur-sm flex items-center justify-center shadow-[0_0_15px_rgba(6,182,212,0.5)]">
+                                <span class="font-mono text-sm font-bold text-white tracking-widest">15C-123.45</span>
+                            </div>
+                        </div>
+                        <div class="p-4 flex-1 flex flex-col justify-center space-y-3">
+                            <div class="flex justify-between items-center border-b border-white/5 pb-2">
+                                <span class="text-xs text-gray-400">Khách/Đối tác</span>
+                                <span class="text-xs font-bold text-white">Samsung Logistics</span>
+                            </div>
+                            <div class="flex justify-between items-center border-b border-white/5 pb-2">
+                                <span class="text-xs text-gray-400">Tải trọng (Weighbridge)</span>
+                                <span class="text-xs font-mono font-bold text-semantic-warning">28.5 Tấn</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-gray-400">Giấy phép EHS/PTW</span>
+                                <span class="text-[10px] bg-semantic-success/20 text-semantic-success px-2 py-0.5 rounded font-bold uppercase">Đã duyệt an toàn</span>
+                            </div>
+                        </div>
+                        <button class="w-full py-3 bg-sector-ind/10 text-sector-ind text-xs font-bold hover:bg-sector-ind/20 transition-colors uppercase tracking-wider border-t border-sector-ind/20">Mở Barie Nhập Cảnh</button>
+                    </div>
+                </div>
+
+                <!-- Row 3: One-Stop-Shop & Admin Services -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    
+                    <!-- Tenant Success & Licensing (One-Stop-Shop) -->
+                    <div class="glass-panel p-5 rounded-xl border border-white/10">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-[10px] font-bold uppercase tracking-widest text-gray-300 flex items-center"><i data-lucide="globe" class="w-3.5 h-3.5 mr-1.5 text-blue-400"></i> Cổng Chăm Sóc Nhà Đầu Tư (Đa Ngôn Ngữ)</h3>
+                            <button class="text-xs text-sector-ind hover:underline">Quản lý Pháp lý (Licensing)</button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead>
+                                    <tr>
+                                        <th class="bg-transparent border-b border-white/10 text-gray-500 py-2">Nhà Đầu Tư</th>
+                                        <th class="bg-transparent border-b border-white/10 text-gray-500 py-2">Yêu Cầu (Tickets)</th>
+                                        <th class="bg-transparent border-b border-white/10 text-gray-500 py-2">Tiến Độ Giấy Phép</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b border-white/5">
+                                        <td class="py-3 font-medium text-white flex items-center"><img src="https://flagcdn.com/w20/jp.png" class="w-4 h-3 mr-2"> Nidec Corp</td>
+                                        <td class="py-3 text-gray-400 truncate max-w-[150px]">Yêu cầu khảo sát đấu nối điện 3 pha</td>
+                                        <td class="py-3"><span class="text-[9px] bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded border border-blue-500/30">Giấy phép DTM (Đang duyệt)</span></td>
+                                    </tr>
+                                    <tr class="border-b border-white/5">
+                                        <td class="py-3 font-medium text-white flex items-center"><img src="https://flagcdn.com/w20/us.png" class="w-4 h-3 mr-2"> Amkor Tech</td>
+                                        <td class="py-3 text-gray-400 truncate max-w-[150px]">Cập nhật hóa đơn nước thải (K-factor)</td>
+                                        <td class="py-3"><span class="text-[9px] bg-semantic-success/20 text-semantic-success px-2 py-0.5 rounded border border-semantic-success/30">ERC (Hoàn tất)</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Shared Services Booking -->
+                    <div class="glass-panel p-5 rounded-xl border border-white/10">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-[10px] font-bold uppercase tracking-widest text-gray-300 flex items-center"><i data-lucide="forklift" class="w-3.5 h-3.5 mr-1.5 text-sector-ind"></i> Quản Lý Tiện Ích Dùng Chung (Shared Services)</h3>
+                            <button class="text-[10px] bg-white/10 px-2 py-1 rounded text-white hover:bg-white/20 transition-colors">+ Tạo Booking</button>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between bg-black/40 p-3 rounded border border-white/5">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 rounded bg-sector-ind/10 text-sector-ind flex items-center justify-center mr-3"><i data-lucide="forklift" class="w-5 h-5"></i></div>
+                                    <div>
+                                        <p class="text-xs font-bold text-white">Thuê Xe Nâng (5 Tấn)</p>
+                                        <p class="text-[10px] text-gray-500 mt-0.5">Nhà máy Goertek (Lô D1) • 14:00 - 16:00</p>
+                                    </div>
+                                </div>
+                                <span class="text-[10px] font-bold text-semantic-success bg-semantic-success/10 px-2 py-1 rounded">Đã xác nhận</span>
+                            </div>
+                            <div class="flex items-center justify-between bg-black/40 p-3 rounded border border-white/5 opacity-60">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 rounded bg-purple-500/10 text-purple-400 flex items-center justify-center mr-3"><i data-lucide="monitor-speaker" class="w-5 h-5"></i></div>
+                                    <div>
+                                        <p class="text-xs font-bold text-white">Phòng Hội Thảo Trung Tâm (VIP)</p>
+                                        <p class="text-[10px] text-gray-500 mt-0.5">BQL KCN họp đối tác • 09:00 - 11:30</p>
+                                    </div>
+                                </div>
+                                <span class="text-[10px] font-bold text-gray-400 bg-gray-800 px-2 py-1 rounded">Đã kết thúc</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Row 4: VIP TENANT 360° CONTROL CENTER (MEIKO PCB PLANT) -->
+                <div class="mt-8 pt-8 border-t border-border_line relative">
+                    <div class="absolute top-0 left-1/4 right-1/4 h-px bg-gradient-to-r from-transparent via-sector-ind to-transparent shadow-[0_0_15px_#06b6d4]"></div>
+                    
+                    <div class="flex justify-between items-end mb-6">
+                        <div class="flex items-center">
+                            <div class="w-14 h-14 bg-[#111] border-2 border-sector-ind rounded-lg shadow-[0_0_15px_rgba(6,182,212,0.3)] flex items-center justify-center text-xl font-bold text-white mr-4">
+                                MK
+                            </div>
+                            <div>
+                                <h3 class="font-serif text-2xl font-bold text-white flex items-center mb-1">
+                                    Hồ Sơ Khách Hàng Chiến Lược (VIP 360°) <img src="https://flagcdn.com/w20/jp.png" class="w-5 h-4 ml-3 border border-gray-600 rounded-sm">
+                                </h3>
+                                <p class="text-sm text-gray-400">Giám sát rủi ro và vận hành chuyên sâu: <span class="text-white font-medium">MEIKO Electronics (Ngành PCB - 10ha)</span></p>
+                            </div>
+                        </div>
+                        <div class="flex space-x-3">
+                            <button class="px-4 py-2 rounded-lg bg-black border border-white/10 hover:bg-white/5 text-xs text-white font-medium flex items-center transition-colors">
+                                <i data-lucide="folder-open" class="w-4 h-4 mr-2 text-gray-400"></i> Hồ sơ doanh nghiệp
+                            </button>
+                            <button class="px-4 py-2 rounded-lg bg-sector-ind/10 border border-sector-ind/30 hover:bg-sector-ind/20 text-xs text-sector-ind font-bold flex items-center transition-colors shadow-[0_0_10px_rgba(6,182,212,0.2)]">
+                                <i data-lucide="file-signature" class="w-4 h-4 mr-2"></i> Xuất Báo Cáo EHS
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                        <!-- Block 1: Môi trường & Nước thải -->
+                        <div class="glass-panel p-5 rounded-xl border border-semantic-danger/30 bg-gradient-to-b from-semantic-danger/5 to-transparent relative shadow-[0_0_20px_rgba(239,68,68,0.05)]">
+                            <div class="absolute top-4 right-4 flex items-center">
+                                <span class="text-[9px] font-bold text-semantic-success uppercase bg-semantic-success/10 border border-semantic-success/30 px-2 py-1 rounded flex items-center">
+                                    <span class="w-1.5 h-1.5 bg-semantic-success rounded-full mr-1.5 animate-pulse"></span> Van Xả: Mở
+                                </span>
+                            </div>
+                            <h4 class="text-xs font-bold uppercase tracking-widest text-semantic-danger mb-4 flex items-center">
+                                <i data-lucide="biohazard" class="w-4 h-4 mr-2"></i> Nước Thải & Hóa Chất (Điểm đấu nối)
+                            </h4>
+                            
+                            <div class="space-y-4">
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="bg-black/50 p-3 rounded border border-white/5">
+                                        <p class="text-[10px] text-gray-500 mb-1">Lưu lượng (AMS)</p>
+                                        <p class="text-lg font-mono font-bold text-white">4,250 <span class="text-[10px] text-gray-400">m³/ngày</span></p>
+                                    </div>
+                                    <div class="bg-black/50 p-3 rounded border border-white/5">
+                                        <p class="text-[10px] text-gray-500 mb-1">Độ pH</p>
+                                        <p class="text-lg font-mono font-bold text-white">6.8 <span class="text-[10px] text-gray-400">(Chuẩn)</span></p>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-red-900/10 border border-red-500/20 p-3 rounded">
+                                    <p class="text-[10px] uppercase font-bold text-gray-400 mb-2">Quan trắc Kim Loại Nặng (QCVN 40:2011)</p>
+                                    <div class="space-y-2">
+                                        <div class="flex justify-between items-center text-xs font-mono">
+                                            <span class="text-gray-300 font-sans">Đồng (Cu)</span>
+                                            <div><span class="text-semantic-warning font-bold">1.8 mg/l</span> <span class="text-gray-500 text-[9px] ml-1">/ max 2.0</span></div>
+                                        </div>
+                                        <div class="w-full bg-gray-800 h-1 rounded"><div class="bg-semantic-warning h-1 rounded" style="width: 90%"></div></div>
+                                        
+                                        <div class="flex justify-between items-center text-xs font-mono pt-1">
+                                            <span class="text-gray-300 font-sans">Xyanua (CN-)</span>
+                                            <div><span class="text-semantic-success font-bold">0.02 mg/l</span> <span class="text-gray-500 text-[9px] ml-1">/ max 0.1</span></div>
+                                        </div>
+                                        <div class="w-full bg-gray-800 h-1 rounded"><div class="bg-semantic-success h-1 rounded" style="width: 20%"></div></div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-black/50 p-2.5 rounded border border-white/5 flex justify-between items-center cursor-pointer hover:bg-white/5">
+                                    <div class="flex items-center"><i data-lucide="truck" class="w-4 h-4 mr-2 text-gray-400"></i> <span class="text-xs text-gray-300">Manifest Bùn nguy hại (Hôm nay)</span></div>
+                                    <span class="text-[10px] bg-gray-800 px-2 py-0.5 rounded text-white">3 Xe xuất bến</span>
+                                </div>
+
+                                <button class="w-full py-2.5 bg-red-600/20 border border-red-500/50 text-red-500 hover:bg-red-600 hover:text-white rounded text-xs font-bold transition-colors shadow-[0_0_10px_rgba(239,68,68,0.2)]">
+                                    ĐÓNG VAN XẢ KHẨN CẤP
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Block 2: Hạ tầng & An toàn EHS -->
+                        <div class="glass-panel p-5 rounded-xl border border-white/10 flex flex-col">
+                            <h4 class="text-xs font-bold uppercase tracking-widest text-sector-ind mb-4 flex items-center">
+                                <i data-lucide="zap" class="w-4 h-4 mr-2"></i> Năng lượng & An Toàn (EHS)
+                            </h4>
+                            
+                            <div class="space-y-5 flex-1">
+                                <div>
+                                    <div class="flex justify-between items-center mb-1">
+                                        <span class="text-[10px] text-gray-500 uppercase font-bold">Phụ tải điện (Live)</span>
+                                        <span class="text-[9px] bg-sector-ind/20 text-sector-ind px-1.5 py-0.5 rounded border border-sector-ind/30">Chống sụt áp: Active</span>
+                                    </div>
+                                    <div class="flex items-baseline space-x-2">
+                                        <p class="text-2xl font-mono font-bold text-white">18.5 <span class="text-xs text-gray-400">MW</span></p>
+                                    </div>
+                                    <svg class="w-full h-8 mt-2" preserveAspectRatio="none">
+                                        <polyline points="0,20 20,22 40,15 60,18 80,10 100,12 120,5 140,8 160,2 180,5 200,0 220,10 240,8 260,15 280,12 300,20" fill="none" stroke="#06b6d4" stroke-width="2" vector-effect="non-scaling-stroke" />
+                                        <polyline points="0,32 0,20 20,22 40,15 60,18 80,10 100,12 120,5 140,8 160,2 180,5 200,0 220,10 240,8 260,15 280,12 300,20 300,32" fill="rgba(6,182,212,0.1)" stroke="none" vector-effect="non-scaling-stroke" />
+                                    </svg>
+                                </div>
+
+                                <div class="bg-green-900/10 border border-green-500/20 p-3 rounded flex justify-between items-center">
+                                    <div>
+                                        <p class="text-xs font-bold text-semantic-success flex items-center"><i data-lucide="sun" class="w-3 h-3 mr-1"></i> Năng lượng Xanh (ESG)</p>
+                                        <p class="text-[10px] text-gray-400 mt-1">Rooftop Solar & I-REC Certs</p>
+                                    </div>
+                                    <span class="text-lg font-mono font-bold text-white">35%</span>
+                                </div>
+
+                                <div>
+                                    <p class="text-[10px] text-gray-500 uppercase font-bold mb-2">Quản lý rủi ro nhà máy</p>
+                                    <div class="space-y-2">
+                                        <div class="bg-black/50 p-2.5 rounded border border-white/5 flex justify-between items-center hover:bg-white/5 cursor-pointer">
+                                            <div class="flex items-center"><i data-lucide="shield-alert" class="w-4 h-4 mr-2 text-orange-400"></i> <span class="text-xs text-gray-300">Ma trận liên lạc Khẩn cấp</span></div>
+                                            <i data-lucide="external-link" class="w-3 h-3 text-gray-500"></i>
+                                        </div>
+                                        <div class="bg-black/50 p-2.5 rounded border border-white/5 flex justify-between items-center hover:bg-white/5 cursor-pointer">
+                                            <div class="flex items-center"><i data-lucide="file-warning" class="w-4 h-4 mr-2 text-gray-400"></i> <span class="text-xs text-gray-300">Sơ đồ bồn hóa chất (SDS 3D)</span></div>
+                                            <i data-lucide="external-link" class="w-3 h-3 text-gray-500"></i>
+                                        </div>
+                                        <div class="bg-black/50 p-2.5 rounded border border-white/5 flex justify-between items-center hover:bg-white/5 cursor-pointer">
+                                            <div class="flex items-center"><i data-lucide="hard-hat" class="w-4 h-4 mr-2 text-gray-400"></i> <span class="text-xs text-gray-300">Giấy phép thi công (PTW)</span></div>
+                                            <span class="text-[9px] bg-sector-ind/20 text-sector-ind px-1.5 py-0.5 rounded">2 Đang active</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Block 3: Logistics, Pháp lý & Kế toán -->
+                        <div class="glass-panel p-5 rounded-xl border border-white/10 flex flex-col">
+                            <h4 class="text-xs font-bold uppercase tracking-widest text-blue-400 mb-4 flex items-center">
+                                <i data-lucide="gavel" class="w-4 h-4 mr-2"></i> Logistics & Hồ Sơ Pháp Lý
+                            </h4>
+                            
+                            <div class="space-y-5 flex-1">
+                                <div>
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="text-[10px] text-gray-500 uppercase font-bold">Logistics & Giao Thông</span>
+                                        <span class="text-[9px] text-gray-400 bg-white/5 px-2 py-0.5 rounded border border-white/10">Ca sáng: 6h-8h</span>
+                                    </div>
+                                    <div class="bg-black/50 p-3 rounded border border-white/5">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <span class="text-xs text-gray-300">Lưu lượng xe Bus đưa đón</span>
+                                            <span class="font-mono text-xs font-bold text-white">45 Chuyến</span>
+                                        </div>
+                                        <div class="flex justify-between items-center border-t border-white/5 pt-2">
+                                            <span class="text-xs text-gray-300">Xe bồn hóa chất (Whitelist)</span>
+                                            <span class="text-[10px] bg-semantic-success/20 text-semantic-success px-1.5 py-0.5 rounded font-bold">1 Xe đang vào cổng</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <p class="text-[10px] text-gray-500 uppercase font-bold mb-2">Tuân thủ Pháp lý (Compliance)</p>
+                                    <div class="space-y-2">
+                                        <div class="flex justify-between items-center bg-black/50 p-2.5 rounded border border-white/5">
+                                            <span class="text-xs text-gray-300 flex items-center"><i data-lucide="file-check-2" class="w-3.5 h-3.5 mr-1.5 text-gray-500"></i> Giấy phép DTM</span>
+                                            <span class="text-[10px] text-gray-400 font-mono">Hết hạn: 2030</span>
+                                        </div>
+                                        <div class="flex justify-between items-center bg-black/50 p-2.5 rounded border border-white/5">
+                                            <span class="text-xs text-gray-300 flex items-center"><i data-lucide="file-check-2" class="w-3.5 h-3.5 mr-1.5 text-gray-500"></i> Thẩm duyệt PCCC</span>
+                                            <span class="text-[10px] text-gray-400 font-mono">Hết hạn: 2028</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-blue-900/10 border border-blue-500/20 p-4 rounded-lg mt-auto">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <div>
+                                            <p class="text-xs font-bold text-white flex items-center">Hệ số K (Nước thải)</p>
+                                            <p class="text-[9px] text-gray-400 mt-0.5">Dựa trên ô nhiễm PCB thực tế</p>
+                                        </div>
+                                        <span class="text-xl font-mono font-bold text-blue-400">1.85</span>
+                                    </div>
+                                    <p class="text-[10px] text-gray-500 border-t border-blue-500/20 pt-2 flex items-center justify-between">
+                                        Công nợ hiện tại: <span class="font-mono text-white font-bold">2.4 Tỷ VNĐ</span> <button class="text-blue-400 hover:text-white underline">Chi tiết</button>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: INBOX (Omnichannel CRM) -->
+            <div id="tab-inbox" class="tab-content h-full flex flex-col gap-6 overflow-y-auto pb-8">
+                <!-- Title Area -->
+                <div class="flex justify-between items-end shrink-0 mb-2">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white flex items-center tracking-wide">
+                            Tương Tác Đa Kênh & CRM
+                            <span class="text-[10px] font-mono font-bold bg-blue-500/20 border border-blue-500/30 text-blue-400 px-2 py-1 rounded ml-3 uppercase tracking-widest shadow-sm">Omnichannel Inbox</span>
+                        </h2>
+                        <p class="text-xs text-gray-400 mt-1">Thấu hiểu chủ động, phân loại AI Triage, tự động hóa quy trình Onboarding & Campaign.</p>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button class="px-4 py-2 bg-[var(--active-color)]/10 border border-[var(--active-color)]/30 rounded-lg text-xs font-bold text-[var(--active-color)] hover:bg-[var(--active-color)]/20 transition-colors flex items-center shadow-sm"><i data-lucide="megaphone" class="w-4 h-4 mr-2"></i> Quản Trị Chiến Dịch</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 min-h-0">
+                    <!-- COL 1: Omnichannel CRM -->
+                    <div class="col-span-3 glass-panel rounded-2xl flex flex-col h-full overflow-hidden shadow-lg border-white/10">
+                        <div class="p-4 border-b border-border_line bg-black/40 flex justify-between items-center">
+                            <h3 class="text-xs font-bold uppercase tracking-widest text-gray-300 flex items-center"><i data-lucide="inbox" class="w-4 h-4 mr-2 text-blue-400"></i> Omnichannel Inbox</h3>
+                        </div>
+                        <div class="p-3 border-b border-border_line flex space-x-2 overflow-x-auto no-scrollbar bg-black/20">
+                            <span class="px-3 py-1.5 text-[10px] font-bold bg-white/10 text-white rounded-lg cursor-pointer whitespace-nowrap">Tất cả</span>
+                            <span class="px-3 py-1.5 text-[10px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-lg cursor-pointer whitespace-nowrap flex items-center"><i data-lucide="message-circle" class="w-3 h-3 mr-1"></i> Zalo</span>
+                            <span class="px-3 py-1.5 text-[10px] font-bold bg-transparent border border-white/10 text-gray-400 rounded-lg cursor-pointer whitespace-nowrap flex items-center"><i data-lucide="phone" class="w-3 h-3 mr-1"></i> Hotline</span>
+                        </div>
+                        <div class="flex-1 overflow-y-auto space-y-1 p-2 bg-[#0a0a0a]">
+                            <!-- Hotline Pop-up -->
+                            <div class="p-3 rounded-xl bg-semantic-danger/10 border border-semantic-danger/30 relative overflow-hidden group cursor-pointer shadow-[0_0_10px_rgba(239,68,68,0.1)]">
+                                <div class="absolute right-0 top-0 w-1 h-full bg-semantic-danger animate-pulse"></div>
+                                <div class="flex justify-between items-start mb-2">
+                                    <span class="text-xs font-bold text-white flex items-center"><i data-lucide="phone-incoming" class="w-3.5 h-3.5 mr-1.5 text-semantic-danger animate-pulse"></i> Đang gọi tới...</span>
+                                    <span class="text-[10px] text-gray-400 font-mono">Now</span>
+                                </div>
+                                <p class="text-xs text-semantic-danger font-bold mb-1">0904.xxx.882 (Khách VIP)</p>
+                                <span class="text-[9px] bg-semantic-danger/20 text-semantic-danger px-1.5 py-0.5 rounded font-mono border border-semantic-danger/30">Tự động Pop-up Hồ Sơ</span>
+                            </div>
+                            
+                            <!-- App Ticket -->
+                            <div class="p-3 rounded-xl bg-white/5 border border-white/10 cursor-pointer">
+                                <div class="flex justify-between items-start mb-2">
+                                    <span class="text-xs font-bold text-white">Nha Trang (A.32)</span>
+                                    <span class="text-[10px] text-gray-400 font-mono">10:15</span>
+                                </div>
+                                <p class="text-xs text-gray-400 mb-2 truncate">Nước rò rỉ phòng tắm khách!</p>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[9px] bg-brand-green/20 text-brand-green border border-brand-green/30 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">App Cư Dân</span>
+                                    <span class="text-[9px] text-gray-500"><i data-lucide="bot" class="w-3 h-3 inline"></i> Triage</span>
+                                </div>
+                            </div>
+
+                            <!-- Zalo Message -->
+                            <div class="p-3 rounded-xl hover:bg-white/5 border border-transparent cursor-pointer transition-colors">
+                                <div class="flex justify-between items-start mb-2">
+                                    <span class="text-xs font-bold text-gray-300">Quốc Bảo (B.15)</span>
+                                    <span class="text-[10px] text-gray-500 font-mono">09:30</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mb-2 truncate">Cho mình hỏi thủ tục trả mặt bằng...</p>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[9px] bg-blue-500/20 text-blue-400 border border-blue-500/30 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">Zalo OA</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- COL 2: Active Workspace & Auto Workflow (6/12) -->
+                    <div class="col-span-6 glass-panel rounded-2xl flex flex-col h-full relative overflow-hidden shadow-lg border-white/10">
+                        <!-- Chat Header -->
+                        <div class="h-16 px-5 border-b border-border_line flex justify-between items-center bg-black/60 shrink-0 backdrop-blur-md">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-sm font-bold text-white mr-4 border border-gray-600 shadow-inner">NT</div>
+                                <div>
+                                    <h2 class="text-sm font-bold text-white flex items-center">Ticket #TK-882: Nước rò rỉ phòng tắm khách!</h2>
+                                    <p class="text-[10px] text-gray-400 mt-1">Nguồn: App Cư dân | SLA: <span class="text-semantic-danger font-mono font-bold">14:00</span></p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex-1 overflow-y-auto p-6 bg-transparent space-y-6">
+                            <!-- AI Triage -->
+                            <div class="flex justify-center">
+                                <div class="bg-purple-900/20 border border-purple-500/40 text-purple-300 text-xs px-4 py-2.5 rounded-xl flex flex-col shadow-[0_0_20px_rgba(168,85,247,0.15)] backdrop-blur-sm max-w-lg w-full">
+                                    <div class="flex items-center mb-2 font-bold"><i data-lucide="bot" class="w-4 h-4 mr-2 text-purple-400"></i> Trợ lý ảo & Phân loại thông minh (AI Triage)</div>
+                                    <div class="grid grid-cols-2 gap-2 text-[10px]">
+                                        <div class="bg-black/50 p-2 rounded border border-white/5"><span class="text-gray-400">Gắn thẻ:</span> <span class="text-white font-mono bg-white/10 px-1 rounded ml-1">RÒ RỈ NƯỚC</span></div>
+                                        <div class="bg-black/50 p-2 rounded border border-white/5"><span class="text-gray-400">Mức độ:</span> <span class="text-semantic-danger font-bold ml-1">Ưu tiên cao (SLA 15m)</span></div>
+                                        <div class="col-span-2 bg-black/50 p-2 rounded border border-white/5"><span class="text-gray-400">Định tuyến:</span> <span class="text-brand-green font-medium ml-1">Auto-assigned -> Đội M&E (Anh Tuấn)</span></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Chat Bubbles -->
+                            <div class="flex items-start">
+                                <div class="w-8 h-8 rounded-full bg-gray-800 border border-gray-600 flex items-center justify-center text-xs font-bold text-white shrink-0 mt-1">NT</div>
+                                <div class="ml-3 max-w-[75%]">
+                                    <div class="bg-[#111] p-3 rounded-2xl rounded-tl-sm border border-white/10 shadow-md text-xs text-gray-300">
+                                        Chào ban quản lý, vòi nước đang bị rỉ liên tục làm ướt hết sàn.
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start flex-row-reverse">
+                                <div class="w-8 h-8 rounded-full bg-brand-green/20 border border-brand-green/50 text-brand-green flex items-center justify-center font-bold text-xs shrink-0 mt-1 ml-3">AD</div>
+                                <div class="mr-0 max-w-[75%]">
+                                    <div class="bg-brand-green/10 border border-brand-green/20 p-3 rounded-2xl rounded-tr-sm shadow-md text-xs text-gray-200">
+                                        Em đã nhận thông tin và điều phối anh Tuấn (Kỹ thuật) lên ngay ạ.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Auto CSAT/NPS -->
+                            <div class="flex justify-center">
+                                <div class="bg-white/5 border border-white/10 text-gray-300 text-xs px-4 py-3 rounded-xl flex flex-col items-center max-w-sm w-full">
+                                    <i data-lucide="check-circle-2" class="w-5 h-5 text-semantic-success mb-2"></i>
+                                    <span class="font-bold text-white mb-1">Lệnh công việc hoàn thành</span>
+                                    <span class="text-[10px] text-gray-400 mb-3 text-center">Khảo sát CSAT/NPS đã tự động gửi đến App cư dân để đo lường hiệu suất.</span>
+                                    <div class="bg-black/50 p-2.5 rounded-lg border border-semantic-success/30 w-full flex justify-between items-center">
+                                        <span class="text-[10px] text-semantic-success font-bold">Khách hàng đánh giá:</span>
+                                        <div class="flex text-brand-gold">
+                                            <i data-lucide="star" class="w-3.5 h-3.5 fill-current"></i>
+                                            <i data-lucide="star" class="w-3.5 h-3.5 fill-current"></i>
+                                            <i data-lucide="star" class="w-3.5 h-3.5 fill-current"></i>
+                                            <i data-lucide="star" class="w-3.5 h-3.5 fill-current"></i>
+                                            <i data-lucide="star" class="w-3.5 h-3.5 fill-current"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Onboarding/Offboarding Widget -->
+                            <div class="mt-6 p-4 rounded-xl border border-blue-500/30 bg-blue-900/10 shadow-[inset_0_0_20px_rgba(59,130,246,0.05)]">
+                                <h4 class="text-xs font-bold uppercase tracking-widest text-blue-400 mb-3 flex items-center"><i data-lucide="arrow-right-left" class="w-4 h-4 mr-2"></i> Quy trình On/Offboarding Số Hóa</h4>
+                                <div class="space-y-2">
+                                    <div class="flex items-center text-[10px] text-gray-300 bg-black/40 p-2 rounded border border-white/5">
+                                        <i data-lucide="check-square" class="w-3.5 h-3.5 text-semantic-success mr-2"></i> Sinh biên bản điện tử bàn giao
+                                    </div>
+                                    <div class="flex items-center text-[10px] text-gray-300 bg-black/40 p-2 rounded border border-white/5">
+                                        <i data-lucide="check-square" class="w-3.5 h-3.5 text-semantic-success mr-2"></i> Cài đặt thông số đồng hồ điện/nước ban đầu
+                                    </div>
+                                    <div class="flex items-center text-[10px] text-gray-400 bg-black/40 p-2 rounded border border-blue-500/20">
+                                        <i data-lucide="square" class="w-3.5 h-3.5 mr-2 text-blue-400"></i> Thu hồi/Phát hành thẻ an ninh (Đang chờ)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Input Area -->
+                        <div class="p-3 bg-black/60 border-t border-border_line shrink-0 backdrop-blur-md">
+                            <div class="relative">
+                                <textarea class="w-full bg-[#050505] border border-gray-700 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-[var(--active-color)] resize-none h-12 placeholder-gray-600" placeholder="Nhập phản hồi..."></textarea>
+                                <button class="absolute bottom-2 right-2 px-3 py-1 bg-[var(--active-color)] text-black rounded text-[10px] font-bold hover:opacity-80 transition-colors">Gửi</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- COL 3: CRM 360 & Analytics (3/12) -->
+                    <div class="col-span-3 glass-panel rounded-2xl flex flex-col h-full overflow-y-auto shadow-lg bg-[#0a0a0a] border-white/10">
+                        <div class="p-5 border-b border-border_line text-center bg-gradient-to-b from-white/5 to-transparent relative">
+                            <div class="w-14 h-14 rounded-full bg-cover mx-auto mb-2 border-2 border-[var(--active-color)] shadow-[0_0_15px_currentColor]" style="background-image: url('https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150'); color: var(--active-color);"></div>
+                            <h3 class="font-bold text-sm text-white flex items-center justify-center">Nha Trang <i data-lucide="badge-check" class="w-3.5 h-3.5 text-blue-400 ml-1"></i></h3>
+                            <p class="text-[10px] text-gray-400 font-mono mt-0.5">Penthouse A.32</p>
+                        </div>
+                        
+                        <div class="p-5 space-y-6 text-sm">
+                            <!-- Segment & Campaigns -->
+                            <div>
+                                <h4 class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3 flex items-center"><i data-lucide="pie-chart" class="w-3.5 h-3.5 mr-1.5"></i> Phân tập & Chiến dịch</h4>
+                                <div class="flex flex-wrap gap-1.5 mb-3">
+                                    <span class="text-[9px] bg-brand-gold/20 text-brand-gold border border-brand-gold/30 px-2 py-0.5 rounded font-bold uppercase">Khách VIP</span>
+                                    <span class="text-[9px] bg-white/10 text-gray-300 border border-white/20 px-2 py-0.5 rounded uppercase">Gia đình có trẻ nhỏ</span>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="bg-black/50 p-2.5 rounded border border-white/5">
+                                        <p class="text-[10px] text-white font-medium">Lịch xịt muỗi định kỳ</p>
+                                        <p class="text-[8px] text-gray-500 mt-0.5">Push Notification • <span class="text-semantic-success">Đã xem</span></p>
+                                    </div>
+                                    <div class="bg-black/50 p-2.5 rounded border border-brand-gold/20">
+                                        <p class="text-[10px] text-brand-gold font-medium flex items-center"><i data-lucide="gift" class="w-3 h-3 mr-1"></i> Thư chúc mừng sinh nhật</p>
+                                        <p class="text-[8px] text-gray-500 mt-0.5">Zalo ZNS • <span class="text-blue-400">Đã lên lịch (Tuần sau)</span></p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- CSAT / NPS -->
+                            <div>
+                                <h4 class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3 flex items-center"><i data-lucide="bar-chart-2" class="w-3.5 h-3.5 mr-1.5"></i> Chỉ số Hài Lòng</h4>
+                                <div class="bg-semantic-success/10 border border-semantic-success/20 p-4 rounded-xl flex items-center justify-between shadow-[inset_0_0_15px_rgba(0,223,130,0.05)]">
+                                    <div>
+                                        <p class="text-2xl font-mono font-bold text-semantic-success">9.5</p>
+                                        <p class="text-[10px] text-semantic-success uppercase font-bold tracking-wider mt-1">NPS Promoter</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-[10px] text-gray-400 mb-1">CSAT TB (6 tháng)</p>
+                                        <div class="flex text-brand-gold justify-end">
+                                            <i data-lucide="star" class="w-3 h-3 fill-current"></i>
+                                            <i data-lucide="star" class="w-3 h-3 fill-current"></i>
+                                            <i data-lucide="star" class="w-3 h-3 fill-current"></i>
+                                            <i data-lucide="star" class="w-3 h-3 fill-current"></i>
+                                            <i data-lucide="star-half" class="w-3 h-3 fill-current"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: KẾ TOÁN (Hidden by default) -->
+            <div id="tab-finance" class="tab-content hidden h-full flex flex-col glass-panel rounded-xl shadow-lg overflow-hidden">
+                <div class="h-14 border-b border-border_line flex items-center justify-between px-4 bg-black/40 shrink-0">
+                    <div class="flex space-x-3">
+                        <select class="text-xs border border-gray-700 rounded px-3 py-1.5 bg-[#111] text-white focus:outline-none focus:border-[var(--active-color)]">
+                            <option>Kỳ cước: Tháng 03/2026</option>
+                        </select>
+                        <select class="text-xs border border-gray-700 rounded px-3 py-1.5 bg-[#111] text-white focus:outline-none focus:border-[var(--active-color)]">
+                            <option>Phân khúc: Khu Công Nghiệp (B2B)</option>
+                        </select>
+                    </div>
+                    <div class="flex space-x-3">
+                        <button class="px-3 py-1.5 bg-white/5 border border-white/10 rounded text-xs font-bold uppercase tracking-wider hover:bg-white/10 text-gray-300 flex items-center transition-colors">
+                            <i data-lucide="download" class="w-3.5 h-3.5 mr-1.5"></i> Xuất Báo cáo
+                        </button>
+                        <button class="px-3 py-1.5 bg-semantic-success/20 border border-semantic-success/50 text-semantic-success rounded text-xs font-bold uppercase tracking-wider hover:bg-semantic-success/30 flex items-center transition-colors shadow-[0_0_10px_rgba(0,223,130,0.2)]">
+                            <i data-lucide="check-circle" class="w-3.5 h-3.5 mr-1.5"></i> Đối soát ERP Auto
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex-1 overflow-auto relative bg-[#0a0a0a]">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr>
+                                <th class="w-8 text-center"><input type="checkbox" class="rounded border-gray-600 bg-transparent"></th>
+                                <th class="w-28">Mã Hóa Đơn</th>
+                                <th>Nhà Đầu Tư (FDI)</th>
+                                <th class="text-right">Phí Thuê (RBF/Đất)</th>
+                                <th class="text-right" title="Common Area Maintenance">Phí CAM</th>
+                                <th class="text-right" title="Đã trừ năng lượng mặt trời">Điện (Net)</th>
+                                <th class="text-right" title="Có hệ số K theo ngành">Nước Thải (Hệ số K)</th>
+                                <th class="text-right font-bold text-white bg-white/5 border-l border-r border-white/5">Tổng Nợ Kỳ (VNĐ)</th>
+                                <th class="text-center w-32">Trạng Thái</th>
+                                <th class="text-center w-16">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody class="font-mono text-xs text-gray-300">
+                            <!-- B2B Invoices -->
+                            <tr class="hover:bg-white/5 cursor-pointer text-gray-500 border-l-2 border-transparent">
+                                <td class="text-center"><input type="checkbox" class="rounded border-gray-600 bg-transparent"></td>
+                                <td class="text-blue-400 hover:underline">INV-IND-001</td>
+                                <td class="font-sans font-bold text-white">Nidec Corp (Lô A2)</td>
+                                <td class="text-right">450,000,000</td>
+                                <td class="text-right">45,000,000</td>
+                                <td class="text-right">120,500,000</td>
+                                <td class="text-right text-orange-400">85,000,000 <span class="text-[9px]">(K=1.2)</span></td>
+                                <td class="text-right font-bold bg-white/5 border-l border-r border-white/5 text-gray-400">700,500,000</td>
+                                <td class="text-center"><span class="text-semantic-success text-[10px] font-sans font-bold uppercase"><i data-lucide="check" class="w-3 h-3 inline mr-1"></i>Đã thanh toán</span></td>
+                                <td class="text-center text-gray-600 hover:text-white"><i data-lucide="more-horizontal" class="w-4 h-4 mx-auto"></i></td>
+                            </tr>
+                            <tr class="hover:bg-yellow-500/5 cursor-pointer border-l-2 border-transparent hover:border-yellow-500 transition-colors">
+                                <td class="text-center"><input type="checkbox" class="rounded border-gray-600 bg-transparent"></td>
+                                <td class="text-blue-400 hover:underline">INV-IND-002</td>
+                                <td class="font-sans font-bold text-white">Foxconn (Lô B1)</td>
+                                <td class="text-right">1,200,000,000</td>
+                                <td class="text-right">120,000,000</td>
+                                <td class="text-right">450,000,000</td>
+                                <td class="text-right">210,000,000 <span class="text-[9px]">(K=1.0)</span></td>
+                                <td class="text-right font-bold text-white bg-white/5 border-l border-r border-white/5">1,980,000,000</td>
+                                <td class="text-center"><span class="bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded text-[10px] font-sans font-bold border border-yellow-500/30 uppercase">Chờ duyệt (Kế toán FDI)</span></td>
+                                <td class="text-center text-gray-500 hover:text-white"><i data-lucide="more-horizontal" class="w-4 h-4 mx-auto"></i></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 4: DIGITAL FRONT-DESK -->
+            <div id="tab-frontdesk" class="tab-content hidden h-full flex flex-col gap-6 overflow-y-auto pb-8">
+                <!-- Title Area -->
+                <div class="flex justify-between items-end shrink-0 mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white flex items-center tracking-wide">
+                            Hệ Sinh Thái Lễ Tân Số 
+                            <span class="text-[10px] font-mono font-bold bg-white/10 border border-white/20 text-white px-2 py-1 rounded ml-3 uppercase tracking-widest shadow-sm">Digital Front-Desk</span>
+                        </h2>
+                        <p class="text-xs text-gray-400 mt-1">Quản trị vận hành tiền sảnh hiện đại, loại bỏ hoàn toàn giấy tờ (Paperless Lobby).</p>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button class="px-4 py-2 bg-black border border-white/10 rounded-lg text-xs font-medium text-white hover:bg-white/5 transition-colors flex items-center"><i data-lucide="printer" class="w-3.5 h-3.5 mr-1.5 text-gray-400"></i> Cài đặt Máy In</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0">
+                    
+                    <!-- COL 1: Giao Nhận & Tài Sản (Smart Parcel & Assets) -->
+                    <div class="flex flex-col gap-6 h-full">
+                        <!-- Smart Parcel Flow -->
+                        <div class="glass-panel p-5 rounded-2xl flex flex-col border border-white/10 flex-1 shadow-lg relative overflow-hidden bg-gradient-to-b from-blue-900/10 to-transparent">
+                            <h3 class="text-xs font-bold uppercase tracking-widest text-blue-400 mb-4 flex items-center"><i data-lucide="package" class="w-4 h-4 mr-2"></i> Giao Nhận Thông Minh (Parcel Flow)</h3>
+                            
+                            <button class="w-full bg-blue-600/20 border border-blue-500/30 text-blue-400 text-xs font-bold py-2.5 rounded-lg hover:bg-blue-600/30 transition-colors flex items-center justify-center mb-4 shadow-[0_0_15px_rgba(59,130,246,0.15)] relative overflow-hidden group">
+                                <div class="absolute inset-0 w-1/4 h-full bg-gradient-to-r from-transparent via-blue-400/20 to-transparent skew-x-12 -translate-x-full group-hover:animate-[scan_1s_ease-in-out]"></div>
+                                <i data-lucide="scan-barcode" class="w-4 h-4 mr-2"></i> Quét Barcode / Chụp OCR Vận Đơn
+                            </button>
+                            
+                            <div class="space-y-3 overflow-y-auto pr-1">
+                                <!-- Parcel 1 -->
+                                <div class="bg-black/50 p-3 rounded-xl border border-white/5 flex flex-col justify-between hover:bg-white/5 transition-colors group relative overflow-hidden">
+                                    <div class="absolute top-0 right-0 bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-bl-lg text-[9px] font-bold uppercase tracking-widest border-b border-l border-blue-500/30">OCR Đã Quét</div>
+                                    <div class="flex justify-between items-start mb-2 mt-3">
+                                        <div>
+                                            <p class="text-xs font-bold text-white flex items-center">Shopee Express <span class="ml-2 text-[9px] text-gray-500 font-mono">SPX8892...</span></p>
+                                            <p class="text-[10px] text-gray-400 mt-1">Đích đến (OCR): <span class="text-white font-medium bg-white/10 px-1 rounded">A.32 (Nha Trang)</span></p>
+                                        </div>
+                                    </div>
+                                    <div class="flex space-x-2 w-full mt-2">
+                                        <button class="flex-1 text-[10px] bg-white/10 hover:bg-white/20 text-white py-1.5 rounded transition-colors font-medium flex items-center justify-center"><i data-lucide="smartphone" class="w-3 h-3 mr-1"></i> Push Notification</button>
+                                        <button class="flex-1 text-[10px] bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 text-blue-300 py-1.5 rounded transition-colors font-bold flex justify-center items-center"><i data-lucide="lock" class="w-3 h-3 mr-1"></i>Cấp PIN Locker</button>
+                                    </div>
+                                </div>
+
+                                <!-- Parcel 2 -->
+                                <div class="bg-black/50 p-3 rounded-xl border border-white/5 flex flex-col justify-between hover:bg-white/5 transition-colors relative overflow-hidden">
+                                    <div class="absolute top-0 right-0 bg-semantic-success/20 text-semantic-success px-2 py-0.5 rounded-bl-lg text-[9px] font-bold uppercase tracking-widest border-b border-l border-semantic-success/30">Lưu Kho</div>
+                                    <div class="flex justify-between items-start mb-2 mt-3">
+                                        <div>
+                                            <p class="text-xs font-bold text-white flex items-center">Lazada <span class="ml-2 text-[9px] text-gray-500 font-mono">LZ9910...</span></p>
+                                            <p class="text-[10px] text-gray-400 mt-1">Đích đến (OCR): <span class="text-white font-medium bg-white/10 px-1 rounded">B.15 (Quốc Bảo)</span></p>
+                                        </div>
+                                    </div>
+                                    <div class="flex space-x-2 w-full mt-2">
+                                        <button class="flex-1 text-[10px] bg-semantic-success/10 border border-semantic-success/30 text-semantic-success py-1.5 rounded font-bold uppercase tracking-wider flex items-center justify-center"><i data-lucide="check-circle" class="w-3 h-3 inline mr-1"></i>Đã cất vào Locker 02</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Asset Management -->
+                        <div class="glass-panel p-5 rounded-2xl flex flex-col border border-white/10 flex-1 shadow-lg bg-[#0a0a0a]">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-xs font-bold uppercase tracking-widest text-semantic-warning flex items-center"><i data-lucide="archive-restore" class="w-4 h-4 mr-2"></i> Tài Sản Nội Khu</h3>
+                                <span class="text-[9px] bg-white/10 text-gray-400 px-2 py-1 rounded border border-white/10 font-mono">Mượn / Trả</span>
+                            </div>
+                            
+                            <div class="space-y-3 flex-1 overflow-y-auto pr-1">
+                                <!-- Asset 1 -->
+                                <div class="flex justify-between items-center border-b border-white/5 pb-3">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 rounded bg-white/5 flex items-center justify-center mr-3 border border-white/10"><i data-lucide="shopping-cart" class="w-4 h-4 text-gray-300"></i></div>
+                                        <div>
+                                            <p class="text-xs font-medium text-white">Xe đẩy hàng #02</p>
+                                            <p class="text-[10px] text-gray-500 mt-0.5">Căn A.12 đang mượn (1h trước)</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-[9px] bg-semantic-success/10 text-semantic-success border border-semantic-success/20 px-2 py-0.5 rounded font-bold uppercase">An toàn</span>
+                                </div>
+                                
+                                <!-- Asset 2 -->
+                                <div class="flex justify-between items-center border-b border-white/5 pb-3">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 rounded bg-white/5 flex items-center justify-center mr-3 border border-white/10"><i data-lucide="utility-pole" class="w-4 h-4 text-gray-300"></i></div>
+                                        <div>
+                                            <p class="text-xs font-medium text-white">Thang nhôm chữ A (2m)</p>
+                                            <p class="text-[10px] text-gray-500 mt-0.5">Nhà thầu sửa chữa C.05</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-[9px] bg-semantic-warning/10 text-semantic-warning border border-semantic-warning/20 px-2 py-0.5 rounded font-bold uppercase">Đến hạn trả</span>
+                                </div>
+
+                                <!-- Asset 3 (Overdue) -->
+                                <div class="flex justify-between items-center pb-1">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 rounded bg-semantic-danger/10 border border-semantic-danger/20 flex items-center justify-center mr-3 shadow-[0_0_10px_rgba(239,68,68,0.1)]"><i data-lucide="umbrella" class="w-4 h-4 text-semantic-danger"></i></div>
+                                        <div>
+                                            <p class="text-xs font-medium text-white">Ô dù che mưa VIP #05</p>
+                                            <p class="text-[10px] text-gray-500 mt-0.5">Căn B.05 đang mượn</p>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="text-[9px] bg-semantic-danger/20 border border-semantic-danger/30 text-semantic-danger px-2 py-0.5 rounded font-bold uppercase animate-pulse">Quá hạn 2 ngày</span>
+                                        <p class="text-[9px] text-semantic-danger/80 mt-1.5 cursor-pointer hover:underline font-medium flex items-center justify-end"><i data-lucide="send" class="w-3 h-3 mr-1"></i> Gửi ZNS nhắc nhở</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="w-full mt-3 py-2 border border-dashed border-gray-600 text-gray-400 text-xs font-medium rounded-lg hover:border-gray-400 hover:text-white transition-colors flex items-center justify-center bg-white/5">
+                                <i data-lucide="scan-line" class="w-3.5 h-3.5 mr-2"></i> Quét mã vạch khi Giao/Nhận
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- COL 2: Kiosk Tự Phục Vụ (Self-service & eKYC) -->
+                    <div class="glass-panel p-5 rounded-2xl flex flex-col border border-[var(--active-color)]/30 flex-1 shadow-[0_0_30px_rgba(212,175,55,0.05)] bg-gradient-to-b from-[#0a0a0a] to-[#111]">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xs font-bold uppercase tracking-widest text-[var(--active-color)] flex items-center"><i data-lucide="monitor-smartphone" class="w-4 h-4 mr-2"></i> Kiosk Tự Phục Vụ & eKYC</h3>
+                            <span class="flex h-2 w-2 relative"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-semantic-success opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-semantic-success"></span></span>
+                        </div>
+                        
+                        <!-- Kiosk UI Mockup (FaceID) -->
+                        <div class="relative h-44 bg-black rounded-xl overflow-hidden border border-white/10 mb-4 group shadow-inner">
+                            <img src="https://images.unsplash.com/photo-1554200876-56c2f25224fa?q=80&w=400&auto=format&fit=crop" class="w-full h-full object-cover opacity-30 grayscale mix-blend-screen">
+                            <div class="absolute inset-0 flex flex-col items-center justify-center z-10">
+                                <div class="w-20 h-20 border-2 border-brand-green rounded-lg mb-3 relative shadow-[0_0_15px_rgba(0,223,130,0.4)] bg-brand-green/5">
+                                    <!-- Scan line -->
+                                    <div class="absolute top-0 left-0 w-full h-0.5 bg-brand-green shadow-[0_0_10px_#00df82] animate-[scan_2s_ease-in-out_infinite]"></div>
+                                </div>
+                                <span class="text-[10px] text-brand-green font-mono font-bold bg-black/80 px-3 py-1 rounded border border-brand-green/30 tracking-widest flex items-center"><i data-lucide="scan-face" class="w-3 h-3 mr-1.5"></i> FACE ID SCANNING...</span>
+                            </div>
+                        </div>
+
+                        <!-- Visitor Pass Generator -->
+                        <div class="flex-1 flex flex-col justify-end">
+                            <p class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-3 flex items-center"><i data-lucide="users" class="w-3.5 h-3.5 mr-1.5"></i> Luồng Khách Viếng Thăm (Live)</p>
+                            <div class="space-y-3">
+                                
+                                <!-- Passed eKYC & Pass Printing -->
+                                <div class="bg-black/40 p-3 rounded-xl border border-white/5 flex flex-col hover:bg-white/5 transition-colors">
+                                    <div class="flex justify-between items-start mb-3">
+                                        <div class="flex items-center">
+                                            <div class="w-8 h-8 rounded-full bg-gray-800 border border-gray-600 flex items-center justify-center mr-3"><i data-lucide="user" class="w-4 h-4 text-gray-300"></i></div>
+                                            <div>
+                                                <span class="text-xs font-bold text-white">Trần Quốc Toản</span>
+                                                <p class="text-[10px] text-gray-400 mt-0.5">Khách thăm Căn A.32</p>
+                                            </div>
+                                        </div>
+                                        <span class="text-[9px] bg-semantic-success/20 text-semantic-success px-2 py-0.5 rounded uppercase font-bold border border-semantic-success/30 tracking-wider">eKYC Passed</span>
+                                    </div>
+                                    <!-- Ticket Mockup -->
+                                    <div class="mt-1 bg-white p-2 rounded-lg flex items-center justify-between shadow-[0_0_10px_rgba(255,255,255,0.1)] relative overflow-hidden border-l-4 border-l-[var(--active-color)]">
+                                        <div class="absolute -right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 bg-black rounded-full border-l border-gray-300"></div>
+                                        <div class="absolute -left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 bg-black rounded-full border-r border-[var(--active-color)]"></div>
+                                        
+                                        <div class="pl-2">
+                                            <p class="text-[9px] text-gray-500 uppercase font-bold tracking-widest mb-0.5">Visitor Pass</p>
+                                            <p class="text-[11px] text-black font-bold flex items-center"><i data-lucide="arrow-up-circle" class="w-3 h-3 mr-1 text-black"></i> Phân tầng Thang máy: Tầng 32</p>
+                                        </div>
+                                        <div class="pr-3">
+                                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=40x40&data=ELEVATOR-32" class="w-8 h-8">
+                                        </div>
+                                    </div>
+                                    <p class="text-[9px] text-semantic-success font-medium flex items-center justify-center mt-2"><i data-lucide="printer" class="w-3 h-3 mr-1"></i> Tự động in thẻ & QR hoàn tất</p>
+                                </div>
+
+                                <!-- Scanning Pending -->
+                                <div class="bg-black/40 p-3 rounded-xl border border-white/5 flex flex-col hover:bg-white/5 transition-colors">
+                                    <div class="flex justify-between items-start">
+                                        <div class="flex items-center">
+                                            <div class="w-8 h-8 rounded-full bg-blue-900/30 border border-blue-500/30 flex items-center justify-center mr-3 animate-pulse"><i data-lucide="id-card" class="w-4 h-4 text-blue-400"></i></div>
+                                            <div>
+                                                <span class="text-xs font-bold text-white">Nguyễn Thị B.</span>
+                                                <p class="text-[10px] text-gray-400 mt-0.5">Khách vãng lai / Sale</p>
+                                            </div>
+                                        </div>
+                                        <span class="text-[9px] bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded uppercase font-bold border border-blue-500/30 tracking-wider animate-pulse flex items-center"><i data-lucide="scan" class="w-3 h-3 mr-1"></i>Đang Quét CCCD</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- COL 3: Hành Chính & Phân Ca (Logbook & Rostering) -->
+                    <div class="flex flex-col gap-6 h-full">
+                        <!-- Digital Logbook -->
+                        <div class="glass-panel p-5 rounded-2xl flex flex-col border border-white/10 flex-1 shadow-lg bg-[#0a0a0a]">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-xs font-bold uppercase tracking-widest text-white flex items-center"><i data-lucide="book-open" class="w-4 h-4 mr-2 text-gray-400"></i> Sổ Giao Ca Điện Tử</h3>
+                                <span class="text-[9px] bg-white/10 text-gray-300 border border-white/20 px-2 py-0.5 rounded font-mono">Ca Sáng (06h-14h)</span>
+                            </div>
+                            
+                            <div class="bg-[#111] border border-white/10 rounded-xl p-4 flex-1 flex flex-col">
+                                <div class="flex justify-between items-center mb-3 border-b border-white/5 pb-3">
+                                    <div class="flex items-center text-xs text-gray-300 font-medium">
+                                        <div class="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center mr-2 text-[10px] text-white">AD</div> Lễ Tân: Admin
+                                    </div>
+                                    <!-- Digital Signature -->
+                                    <span class="text-[9px] bg-brand-green/10 text-brand-green px-2 py-1 rounded font-mono border border-brand-green/20 flex items-center shadow-[0_0_10px_rgba(0,223,130,0.1)] cursor-pointer hover:bg-brand-green/20 transition-colors">
+                                        <i data-lucide="pen-tool" class="w-3 h-3 mr-1.5"></i> Đã Ký Số (e-Sign)
+                                    </span>
+                                </div>
+                                <div class="text-xs text-gray-300 leading-relaxed space-y-2.5 flex-1 overflow-y-auto">
+                                    <p class="flex items-start"><i data-lucide="check-square" class="w-3 h-3 text-gray-500 mr-2 mt-0.5 shrink-0"></i> Đã bàn giao 2 chìa khóa master dự phòng cho Tổ An Ninh.</p>
+                                    <p class="flex items-start"><i data-lucide="message-square-dashed" class="w-3 h-3 text-gray-500 mr-2 mt-0.5 shrink-0"></i> Nhờ <span class="text-blue-400 font-bold bg-blue-500/10 px-1.5 py-0.5 rounded cursor-pointer hover:underline border border-blue-500/20 mx-1">@Le_Tan_Ca_Chieu</span> gọi điện nhắc Căn A.32 xuống nhận bưu kiện cồng kềnh nhé, khách báo chiều mới đi làm về.</p>
+                                    <p class="flex items-start"><i data-lucide="check-square" class="w-3 h-3 text-gray-500 mr-2 mt-0.5 shrink-0"></i> Đã thu hồi thẻ khách (Visitor Pass) số 15 của nhà mạng Viettel.</p>
+                                </div>
+                            </div>
+                            <button class="w-full mt-4 py-2.5 bg-white/5 hover:bg-white/10 text-xs font-medium text-white rounded-lg transition-colors border border-dashed border-gray-600 hover:border-gray-400 shadow-sm flex items-center justify-center">
+                                <i data-lucide="plus-circle" class="w-3.5 h-3.5 mr-2"></i> Ghi chú Giao Ca
+                            </button>
+                        </div>
+
+                        <!-- Smart Rostering (Phân ca) -->
+                        <div class="glass-panel p-5 rounded-2xl flex flex-col border border-white/10 flex-1 shadow-lg bg-[#0a0a0a]">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-xs font-bold uppercase tracking-widest text-purple-400 flex items-center"><i data-lucide="calendar-days" class="w-4 h-4 mr-2"></i> Phân Ca Thông Minh</h3>
+                                <i data-lucide="settings-2" class="w-4 h-4 text-gray-500 hover:text-white cursor-pointer transition-colors"></i>
+                            </div>
+                            <div class="space-y-3">
+                                <!-- Safe Rostering -->
+                                <div class="bg-black/50 p-3 rounded-xl border border-white/5 flex items-center justify-between hover:bg-white/5 transition-colors cursor-pointer">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center text-[10px] font-bold mr-3 border border-purple-500/30">BV</div>
+                                        <div>
+                                            <p class="text-xs font-medium text-white">Bảo Vệ - Cổng Chính</p>
+                                            <p class="text-[10px] text-gray-500 mt-0.5">Hoàng (Ca 14:00 - 22:00)</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-[11px] font-mono text-brand-green font-medium bg-brand-green/10 border border-brand-green/20 px-2 py-1 rounded">40h/tuần</span>
+                                </div>
+                                
+                                <!-- Alert: Overwork / Labour Law Violation -->
+                                <div class="bg-semantic-danger/10 p-3 rounded-xl border border-semantic-danger/40 flex items-center justify-between shadow-[inset_0_0_20px_rgba(239,68,68,0.1)] relative overflow-hidden group cursor-pointer">
+                                    <div class="absolute left-0 top-0 bottom-0 w-1 bg-semantic-danger"></div>
+                                    <div class="flex items-center pl-2">
+                                        <div class="w-8 h-8 rounded-full bg-semantic-danger/20 text-semantic-danger flex items-center justify-center text-[10px] font-bold mr-3 border border-semantic-danger/30">LT</div>
+                                        <div>
+                                            <p class="text-xs font-medium text-white">Lễ Tân - Sảnh A</p>
+                                            <p class="text-[10px] text-gray-400 mt-0.5">Lan (Ca 14:00 - 22:00)</p>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="text-xs font-mono text-semantic-danger font-bold drop-shadow-[0_0_5px_rgba(239,68,68,0.5)]">52h/tuần</span>
+                                        <p class="text-[9px] text-semantic-danger mt-1 uppercase font-bold flex items-center justify-end tracking-wider animate-pulse"><i data-lucide="alert-triangle" class="w-3 h-3 mr-1"></i> Vượt Luật LĐ (>48h)</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- TAB 5: BẢN ĐỒ QUẢN TRỊ (Multi-layer Spatial Dashboard) -->
+            <div id="tab-heatmap" class="tab-content hidden h-full flex flex-col lg:flex-row glass-panel rounded-2xl shadow-lg overflow-hidden border-white/10">
+                <!-- Sidebar Controls -->
+                <div class="w-full lg:w-80 border-b lg:border-b-0 lg:border-r border-white/10 bg-black/60 backdrop-blur-md p-6 shrink-0 overflow-y-auto">
+                    <h2 class="text-xs font-bold uppercase tracking-widest text-[var(--active-color)] mb-6 flex items-center"><i data-lucide="layers" class="w-4 h-4 mr-2"></i> Multi-layer Spatial Dashboard</h2>
+
+                    <!-- Selectors -->
+                    <div class="mb-6 space-y-4">
+                        <div>
+                            <label class="text-[10px] font-bold uppercase tracking-widest text-gray-500 block mb-2">Mặt cắt Tòa Nhà</label>
+                            <select class="w-full text-sm font-medium border border-gray-700 rounded-lg p-2.5 focus:outline-none bg-[#111] text-white focus:border-[var(--active-color)] transition-colors shadow-inner">
+                                <option>Tầng 15 (Mixed-use: Office & Serviced Apt)</option>
+                                <option>Tầng Penthouse (32)</option>
+                                <option>Khối đế Thương Mại (Tầng 1-3)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Layers -->
+                    <div class="space-y-4">
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 border-b border-white/10 pb-2">Bật/Tắt Lớp Dữ Liệu (Digital Twin)</p>
+
+                        <!-- Layer 1 -->
+                        <div class="flex items-center justify-between bg-white/5 p-3 rounded-xl border border-white/5 hover:border-white/20 transition-colors cursor-pointer">
+                            <div>
+                                <p class="text-xs font-bold text-white flex items-center"><i data-lucide="maximize" class="w-3.5 h-3.5 mr-1.5 text-gray-400"></i> Trực quan Không gian</p>
+                                <p class="text-[10px] text-gray-500 mt-1">Zoning 2D & Heatmap HVAC</p>
+                            </div>
+                            <div class="w-8 h-4 bg-[var(--active-color)] rounded-full relative shadow-inner"><div class="absolute right-1 top-0.5 w-3 h-3 bg-white rounded-full"></div></div>
+                        </div>
+
+                        <!-- Layer 2 -->
+                        <div class="flex items-center justify-between bg-white/5 p-3 rounded-xl border border-white/5 hover:border-white/20 transition-colors cursor-pointer">
+                            <div>
+                                <p class="text-xs font-bold text-white flex items-center"><i data-lucide="briefcase" class="w-3.5 h-3.5 mr-1.5 text-orange-400"></i> Thương mại & Cho thuê</p>
+                                <p class="text-[10px] text-gray-500 mt-1">HĐ sắp hết hạn (Cam nhấp nháy)</p>
+                            </div>
+                            <div class="w-8 h-4 bg-[var(--active-color)] rounded-full relative shadow-inner"><div class="absolute right-1 top-0.5 w-3 h-3 bg-white rounded-full"></div></div>
+                        </div>
+
+                        <!-- Layer 3 -->
+                        <div class="flex items-center justify-between bg-white/5 p-3 rounded-xl border border-white/5 hover:border-white/20 transition-colors cursor-pointer">
+                            <div>
+                                <p class="text-xs font-bold text-white flex items-center"><i data-lucide="pie-chart" class="w-3.5 h-3.5 mr-1.5 text-semantic-danger"></i> Tài chính & Công nợ</p>
+                                <p class="text-[10px] text-gray-500 mt-1">Bản đồ nợ đọng (Đỏ đậm/nhạt)</p>
+                            </div>
+                            <div class="w-8 h-4 bg-[var(--active-color)] rounded-full relative shadow-inner"><div class="absolute right-1 top-0.5 w-3 h-3 bg-white rounded-full"></div></div>
+                        </div>
+
+                        <!-- Layer 4 -->
+                        <div class="flex items-center justify-between bg-white/5 p-3 rounded-xl border border-white/5 hover:border-white/20 transition-colors cursor-pointer">
+                            <div>
+                                <p class="text-xs font-bold text-white flex items-center"><i data-lucide="wrench" class="w-3.5 h-3.5 mr-1.5 text-blue-400"></i> Kỹ thuật & Vận hành</p>
+                                <p class="text-[10px] text-gray-500 mt-1">Work Orders & Asset Tracking</p>
+                            </div>
+                            <div class="w-8 h-4 bg-[var(--active-color)] rounded-full relative shadow-inner"><div class="absolute right-1 top-0.5 w-3 h-3 bg-white rounded-full"></div></div>
+                        </div>
+
+                        <!-- Layer 5 -->
+                        <div class="flex items-center justify-between bg-white/5 p-3 rounded-xl border border-white/5 hover:border-white/20 transition-colors cursor-pointer">
+                            <div>
+                                <p class="text-xs font-bold text-white flex items-center"><i data-lucide="star" class="w-3.5 h-3.5 mr-1.5 text-brand-gold"></i> Trải nghiệm & An ninh</p>
+                                <p class="text-[10px] text-gray-500 mt-1">Đánh dấu VIP & Cảnh báo CSAT 1*</p>
+                            </div>
+                            <div class="w-8 h-4 bg-[var(--active-color)] rounded-full relative shadow-inner"><div class="absolute right-1 top-0.5 w-3 h-3 bg-white rounded-full"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Heatmap Map Area -->
+                <div class="flex-1 p-6 relative flex flex-col items-center justify-center bg-[#050505] overflow-auto shadow-inner">
+                    <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20 pointer-events-none"></div>
+
+                    <div class="absolute top-6 left-6 z-10 flex space-x-4">
+                        <div class="bg-black/60 backdrop-blur-md border border-white/10 px-4 py-2 rounded-xl">
+                            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Tổng Doanh Thu Tầng</p>
+                            <p class="text-xl font-mono font-bold text-white">1.25B <span class="text-xs text-gray-400">VNĐ/tháng</span></p>
+                        </div>
+                    </div>
+
+                    <!-- Map Container -->
+                    <div class="relative w-full max-w-4xl p-6 bg-[#0a0a0a]/80 backdrop-blur-lg border border-white/10 rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.8)]">
+                        <!-- CSS Grid Floorplan -->
+                        <div class="grid grid-cols-10 gap-3">
+                            
+                            <!-- Top Row: Office Units -->
+                            <!-- Unit 1: Merged (Dynamic Zoning) + VIP Event -->
+                            <div class="col-span-4 row-span-2 bg-[#111] border border-blue-500/30 rounded-lg relative group cursor-pointer hover:bg-white/5 transition-all shadow-[inset_0_0_20px_rgba(59,130,246,0.05)] flex items-center justify-center min-h-[120px]">
+                                <div class="absolute top-2 left-2 text-[10px] font-bold text-blue-400 font-mono">OFFICE 15.01-02 (Merged)</div>
+                                <div class="absolute top-2 right-2 bg-brand-gold/20 text-brand-gold border border-brand-gold/30 px-2 py-0.5 rounded text-[8px] uppercase font-bold flex items-center"><i data-lucide="crown" class="w-3 h-3 mr-1"></i> Sự kiện VIP</div>
+                                
+                                <div class="text-center mt-4">
+                                    <i data-lucide="briefcase" class="w-6 h-6 mx-auto text-gray-500 mb-1"></i>
+                                    <p class="text-xs font-bold text-white">TechCom Bank</p>
+                                </div>
+
+                                <!-- Tooltip Profile -->
+                                <div class="absolute hidden group-hover:block bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 bg-black/90 backdrop-blur-xl border border-white/20 p-4 rounded-xl shadow-2xl z-50">
+                                    <h4 class="text-sm font-bold text-white border-b border-white/10 pb-2 mb-2">Hồ Sơ Khách Thuê (Tenant)</h4>
+                                    <div class="space-y-1.5 text-xs">
+                                        <p class="flex justify-between"><span class="text-gray-400">Doanh nghiệp:</span> <span class="font-bold text-white">TechCom Bank</span></p>
+                                        <p class="flex justify-between"><span class="text-gray-400">Diện tích NLA:</span> <span class="font-mono text-white">450 m²</span></p>
+                                        <p class="flex justify-between"><span class="text-gray-400">Đơn giá thuê:</span> <span class="font-mono text-white">$25/m²</span></p>
+                                        <p class="flex justify-between"><span class="text-gray-400">Hợp đồng còn:</span> <span class="font-bold text-semantic-success">3.5 Năm</span></p>
+                                        <p class="flex items-center text-brand-gold mt-2 pt-2 border-t border-white/10"><i data-lucide="calendar" class="w-3 h-3 mr-1"></i> Đang diễn ra: Đại hội Cổ đông</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Unit 2: Expiring Soon (Commercial Layer) -->
+                            <div class="col-span-3 row-span-2 bg-orange-900/20 border-2 border-orange-500/80 rounded-lg relative group cursor-pointer hover:bg-orange-900/30 transition-all shadow-[0_0_15px_rgba(245,158,11,0.2)] animate-[pulse-border_2s_infinite] flex items-center justify-center min-h-[120px]">
+                                <div class="absolute top-2 left-2 text-[10px] font-bold text-orange-400 font-mono">OFFICE 15.03</div>
+                                <div class="absolute top-2 right-2 bg-orange-500 text-black px-1.5 py-0.5 rounded text-[8px] uppercase font-bold animate-pulse">Sắp Hết Hạn HĐ</div>
+                                
+                                <div class="text-center mt-4">
+                                    <p class="text-xs font-bold text-white">FPT Software</p>
+                                </div>
+
+                                <!-- Tooltip Profile -->
+                                <div class="absolute hidden group-hover:block bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 bg-black/90 backdrop-blur-xl border border-orange-500/50 p-4 rounded-xl shadow-2xl z-50">
+                                    <h4 class="text-sm font-bold text-orange-400 border-b border-white/10 pb-2 mb-2 flex items-center"><i data-lucide="alert-circle" class="w-4 h-4 mr-1.5"></i> Sales Action Required</h4>
+                                    <div class="space-y-1.5 text-xs">
+                                        <p class="flex justify-between"><span class="text-gray-400">Diện tích NLA:</span> <span class="font-mono text-white">200 m²</span></p>
+                                        <p class="flex justify-between"><span class="text-gray-400">Đáo hạn HĐ:</span> <span class="font-bold text-orange-400">45 Ngày nữa</span></p>
+                                        <p class="flex justify-between"><span class="text-gray-400">Lịch sử thanh toán:</span> <span class="text-semantic-success">Tốt</span></p>
+                                        <button class="w-full mt-2 bg-orange-500 text-black font-bold py-1.5 rounded">Tạo Task Tái Ký</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Unit 3: Normal Office -->
+                            <div class="col-span-3 row-span-2 bg-[#111] border border-white/10 rounded-lg relative group cursor-pointer hover:bg-white/5 flex items-center justify-center min-h-[120px]">
+                                <div class="absolute top-2 left-2 text-[10px] font-bold text-gray-500 font-mono">OFFICE 15.04</div>
+                                <p class="text-xs font-bold text-gray-400">Trống (Available)</p>
+                            </div>
+
+                            <!-- Center Corridor -->
+                            <div class="col-span-10 h-16 bg-[#0a0a0a] border-y border-dashed border-gray-700 flex items-center justify-center relative">
+                                <span class="text-[10px] font-bold text-gray-600 tracking-widest uppercase">Hành Lang Trung Tâm & Thang Máy</span>
+                                <!-- Asset Tracking Hover -->
+                                <div class="absolute left-1/4 top-1/2 transform -translate-y-1/2 w-4 h-4 bg-purple-500/20 border border-purple-500 rounded-full flex items-center justify-center cursor-help group">
+                                    <div class="w-1.5 h-1.5 bg-purple-400 rounded-full"></div>
+                                    <div class="absolute hidden group-hover:block bottom-full mb-2 w-48 bg-black/90 border border-purple-500/50 p-3 rounded-lg shadow-xl z-50 text-xs">
+                                        <p class="font-bold text-purple-400 mb-1">Tài sản: FCU Hành Lang 01</p>
+                                        <p class="text-gray-300">Bảo trì lần cuối: 12/03/2026</p>
+                                        <p class="text-semantic-success mt-1">Trạng thái: Hoạt động tốt</p>
+                                    </div>
+                                </div>
+                                <!-- Heatmap Overlay (HVAC) -->
+                                <div class="absolute right-1/4 top-0 w-32 h-full bg-gradient-to-r from-transparent via-red-500/10 to-transparent blur-md pointer-events-none"></div>
+                            </div>
+
+                            <!-- Bottom Row: Serviced Apartments -->
+                            <!-- Apt 1: Bad Debt (Financial Layer) -->
+                            <div class="col-span-2 row-span-2 bg-semantic-danger/20 border-2 border-semantic-danger/60 rounded-lg relative group cursor-pointer hover:bg-semantic-danger/30 transition-all shadow-[inset_0_0_20px_rgba(239,68,68,0.2)] flex flex-col items-center justify-center min-h-[120px]">
+                                <div class="absolute top-2 left-2 text-[10px] font-bold text-semantic-danger font-mono">APT 15.05</div>
+                                <i data-lucide="wallet" class="w-6 h-6 text-semantic-danger mb-1 drop-shadow-[0_0_5px_#ef4444]"></i>
+                                
+                                <!-- Tooltip Profile -->
+                                <div class="absolute hidden group-hover:block bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-56 bg-black/90 backdrop-blur-xl border border-semantic-danger/50 p-4 rounded-xl shadow-2xl z-50">
+                                    <h4 class="text-sm font-bold text-semantic-danger border-b border-white/10 pb-2 mb-2">Báo Cáo Nợ Đọng (Aging)</h4>
+                                    <div class="space-y-1.5 text-xs">
+                                        <p class="flex justify-between"><span class="text-gray-400">Khách thuê:</span> <span class="font-bold text-white">David Smith</span></p>
+                                        <p class="flex justify-between"><span class="text-gray-400">Tổng nợ:</span> <span class="font-mono text-semantic-danger font-bold">45.000.000 đ</span></p>
+                                        <p class="flex justify-between"><span class="text-gray-400">Số ngày nợ:</span> <span class="font-bold text-semantic-danger">> 90 Ngày</span></p>
+                                        <p class="text-[10px] text-gray-500 mt-2 italic">Đã gửi 3 thông báo cắt điện/nước.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Apt 2: Work Order (Maintenance Layer) -->
+                            <div class="col-span-3 row-span-2 bg-[#111] border border-white/10 rounded-lg relative group cursor-pointer hover:bg-white/5 transition-all flex items-center justify-center min-h-[120px]">
+                                <div class="absolute top-2 left-2 text-[10px] font-bold text-gray-400 font-mono">APT 15.06</div>
+                                
+                                <!-- Work Order Pin -->
+                                <div class="absolute -top-3 -right-3 w-8 h-8 bg-semantic-danger text-white rounded-full border-2 border-[#050505] flex items-center justify-center shadow-[0_0_10px_rgba(239,68,68,0.8)] animate-bounce z-20">
+                                    <i data-lucide="wrench" class="w-4 h-4"></i>
+                                </div>
+
+                                <div class="text-center">
+                                    <p class="text-xs font-bold text-white">Trần Lê A.</p>
+                                </div>
+
+                                <!-- Tooltip Profile -->
+                                <div class="absolute hidden group-hover:block bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 bg-black/90 backdrop-blur-xl border border-semantic-danger/50 p-4 rounded-xl shadow-2xl z-50">
+                                    <h4 class="text-sm font-bold text-white border-b border-white/10 pb-2 mb-2 flex items-center"><i data-lucide="alert-triangle" class="w-4 h-4 text-semantic-danger mr-2"></i> Sự cố Kỹ thuật</h4>
+                                    <div class="space-y-1.5 text-xs">
+                                        <p class="flex justify-between"><span class="text-gray-400">Lỗi:</span> <span class="font-bold text-white">Chập điện rọi đèn LED</span></p>
+                                        <p class="flex justify-between"><span class="text-gray-400">Ticket:</span> <span class="font-mono text-blue-400">#TK-8901</span></p>
+                                        <p class="flex justify-between"><span class="text-gray-400">Trạng thái:</span> <span class="text-orange-400">Kỹ thuật đang xử lý</span></p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Apt 3: Normal -->
+                            <div class="col-span-2 row-span-2 bg-[#111] border border-white/10 rounded-lg relative group cursor-pointer hover:bg-white/5 transition-all flex items-center justify-center min-h-[120px]">
+                                <div class="absolute top-2 left-2 text-[10px] font-bold text-gray-400 font-mono">APT 15.07</div>
+                                <p class="text-xs font-bold text-white">Trần B.</p>
+                            </div>
+
+                            <!-- Apt 4: CSAT Alert (Experience Layer) -->
+                            <div class="col-span-3 row-span-2 bg-[#111] border-2 border-semantic-warning/50 rounded-lg relative group cursor-pointer hover:bg-white/5 transition-all flex flex-col items-center justify-center min-h-[120px]">
+                                <div class="absolute top-2 left-2 text-[10px] font-bold text-semantic-warning font-mono">APT 15.08</div>
+                                <div class="absolute top-2 right-2 bg-brand-gold/20 text-brand-gold px-1.5 py-0.5 rounded text-[8px] uppercase font-bold">VIP</div>
+                                
+                                <div class="mt-2 bg-semantic-warning/20 px-2 py-1 rounded border border-semantic-warning/40 flex items-center shadow-[0_0_10px_rgba(245,158,11,0.2)]">
+                                    <i data-lucide="star" class="w-3 h-3 text-semantic-warning fill-current mr-1"></i> <span class="text-xs font-bold text-semantic-warning">1 Sao</span>
+                                </div>
+
+                                <!-- Tooltip Profile -->
+                                <div class="absolute hidden group-hover:block bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 bg-black/90 backdrop-blur-xl border border-semantic-warning/50 p-4 rounded-xl shadow-2xl z-50">
+                                    <h4 class="text-sm font-bold text-semantic-warning border-b border-white/10 pb-2 mb-2 flex items-center"><i data-lucide="frown" class="w-4 h-4 mr-2"></i> Cảnh Báo Trải Nghiệm</h4>
+                                    <div class="space-y-1.5 text-xs">
+                                        <p class="flex justify-between"><span class="text-gray-400">Khách thuê:</span> <span class="font-bold text-brand-gold">Hà Anh (VIP)</span></p>
+                                        <p class="flex justify-between"><span class="text-gray-400">Đánh giá CSAT:</span> <span class="font-bold text-semantic-danger">1/5 Sao (Mới đây)</span></p>
+                                        <div class="bg-white/5 p-2 rounded text-gray-300 mt-2 italic">"Thái độ bảo vệ ca sáng ở sảnh rất tệ, không hỗ trợ bấm thang máy khi tôi xách đồ nặng!"</div>
+                                        <button class="w-full mt-2 bg-semantic-warning text-black font-bold py-1.5 rounded">Gọi điện Xoa dịu ngay</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    
+                    <!-- Legend -->
+                    <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-6 text-[10px] font-bold uppercase tracking-wider text-gray-300 bg-black/80 backdrop-blur-xl px-6 py-3 rounded-2xl border border-white/10 shadow-2xl z-10">
+                        <div class="flex items-center"><div class="w-3 h-3 bg-blue-500/30 border border-blue-500 rounded-sm mr-2 shadow-[0_0_5px_#3b82f6]"></div> Gộp Lô (Zoning)</div>
+                        <div class="flex items-center"><div class="w-3 h-3 bg-orange-500/30 border border-orange-500 rounded-sm mr-2 shadow-[0_0_5px_#f59e0b]"></div> Đáo Hạn Hợp Đồng</div>
+                        <div class="flex items-center"><div class="w-3 h-3 bg-red-500/30 border border-red-500 rounded-sm mr-2 shadow-[0_0_5px_#ef4444]"></div> Nợ Xấu</div>
+                        <div class="flex items-center"><div class="w-3 h-3 bg-transparent border-2 border-semantic-warning rounded-sm mr-2 shadow-[0_0_5px_#f59e0b]"></div> CSAT 1*</div>
+                        <div class="flex items-center"><div class="w-3 h-3 bg-red-500 rounded-full mr-2 shadow-[0_0_5px_#ef4444]"></div> Sự Cố (Ticket)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 6: ĐIỀU PHỐI NHÂN SỰ (Rostering & PTW) -->
+            <div id="tab-roster" class="tab-content hidden h-full flex flex-col glass-panel rounded-xl shadow-lg overflow-hidden border-white/10">
+                <div class="h-14 border-b border-border_line flex items-center justify-between px-6 bg-black/40 shrink-0">
+                    <h2 class="text-sm font-bold text-white uppercase tracking-wider"><i data-lucide="calendar-clock" class="w-4 h-4 inline mr-2 text-sector-ind"></i> Lịch Trực & Quản Lý Nhà Thầu KCN (PTW)</h2>
+                </div>
+
+                <div class="flex-1 flex overflow-hidden bg-[#0a0a0a]">
+                    <!-- Gantt Chart Area -->
+                    <div class="flex-1 overflow-auto border-r border-border_line">
+                        <div class="gantt-row bg-[#111] font-bold text-[9px] text-gray-500 uppercase tracking-widest sticky top-0 z-10 border-b border-gray-700">
+                            <div class="p-3 border-r border-gray-700">Nhà Thầu / Kỹ Thuật (EHS)</div>
+                            <div class="gantt-timeline">
+                                <div class="text-center border-l border-gray-700/50 py-1">08:00</div>
+                                <div class="text-center border-l border-gray-700/50 py-1">10:00</div>
+                                <div class="text-center border-l border-gray-700/50 py-1 text-white bg-white/5">12:00 (Now)</div>
+                                <div class="text-center border-l border-gray-700/50 py-1">14:00</div>
+                                <div class="text-center border-l border-gray-700/50 py-1">16:00</div>
+                                <div class="text-center border-l border-gray-700/50 py-1">18:00</div>
+                            </div>
+                        </div>
+
+                        <!-- Rows -->
+                        <div class="gantt-row hover:bg-white/5 transition-colors">
+                            <div class="p-3 border-r border-white/5 text-xs font-medium flex items-center text-gray-200">
+                                <div class="w-2 h-2 bg-semantic-success rounded-full mr-2 shadow-[0_0_5px_#00df82]"></div> Tuấn (M&E Lưới Điện)
+                            </div>
+                            <div class="gantt-timeline px-1">
+                                <div class="col-start-3 col-span-3 bg-sector-ind/80 border border-sector-ind gantt-bar relative z-10">
+                                    Đo độ võng cáp điện (Trạm T2)
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="gantt-row bg-orange-900/10 hover:bg-orange-900/20 transition-colors border-b border-orange-900/30">
+                            <div class="p-3 border-r border-white/5 text-xs font-bold flex items-center text-orange-400">
+                                <div class="w-2 h-2 bg-orange-500 rounded-full mr-2"></div> Cty XL Nước Thải ABC
+                            </div>
+                            <div class="gantt-timeline px-1">
+                                <div class="col-start-1 col-span-8 bg-gray-600/60 border border-gray-500/50 gantt-bar text-gray-200">
+                                    Nạo vét bể lắng (Yêu cầu PTW Không gian hẹp) <span class="bg-orange-500 text-black px-1 rounded ml-1 text-[8px]">Chờ duyệt Safety</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ticket 1: Completed (Đã hoàn thành) -->
+                        <div class="gantt-row hover:bg-white/5 transition-colors border-b border-white/5 opacity-60">
+                            <div class="p-3 border-r border-white/5 text-xs font-medium flex items-center text-gray-400">
+                                <div class="w-2 h-2 bg-gray-500 rounded-full mr-2"></div> Minh (IT & Camera)
+                            </div>
+                            <div class="gantt-timeline px-1">
+                                <div class="col-start-1 col-span-2 bg-gray-700/60 border border-gray-600 text-gray-300 font-semibold gantt-bar flex justify-between items-center">
+                                    <span>Thay mắt camera cổng chính</span>
+                                    <i data-lucide="check-circle" class="w-3 h-3 text-semantic-success ml-2"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ticket 2: In Progress (Đang làm) -->
+                        <div class="gantt-row hover:bg-white/5 transition-colors border-b border-white/5">
+                            <div class="p-3 border-r border-white/5 text-xs font-medium flex items-center text-blue-200">
+                                <div class="w-2 h-2 bg-blue-500 rounded-full mr-2 shadow-[0_0_8px_#3b82f6]"></div> Hoàng (HVAC Điện Lạnh)
+                            </div>
+                            <div class="gantt-timeline px-1">
+                                <div class="col-start-3 col-span-3 bg-blue-600/50 border border-blue-500/80 text-blue-100 font-semibold gantt-bar relative z-10 shadow-[0_0_15px_rgba(59,130,246,0.2)]">
+                                    Xử lý rò rỉ điều hòa VP Ban Quản Lý <span class="bg-blue-900 text-white px-1.5 py-0.5 rounded ml-1 text-[8px] uppercase tracking-wider font-bold">Đang làm</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ticket 3: Urgent/Emergency (Sự cố khẩn cấp) -->
+                        <div class="gantt-row bg-red-900/10 hover:bg-red-900/20 transition-colors border-b border-red-900/30">
+                            <div class="p-3 border-r border-white/5 text-xs font-bold flex items-center text-red-400">
+                                <div class="w-2 h-2 bg-red-500 rounded-full mr-2 animate-pulse shadow-[0_0_8px_#ef4444]"></div> Đội P.Ứ.N (Spill Response)
+                            </div>
+                            <div class="gantt-timeline px-1">
+                                <div class="col-start-5 col-span-3 bg-red-600/80 border border-red-500 text-white font-bold gantt-bar relative z-10 shadow-[0_0_20px_rgba(239,68,68,0.4)] flex justify-between items-center">
+                                    <span>Dọn dẹp hóa chất rơi vãi Lô C4</span>
+                                    <i data-lucide="alert-triangle" class="w-3.5 h-3.5 ml-2 animate-pulse"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ticket 4: Scheduled Vendor (Đã lên lịch với nhà thầu) -->
+                        <div class="gantt-row hover:bg-white/5 transition-colors border-b border-white/5">
+                            <div class="p-3 border-r border-white/5 text-xs font-medium flex items-center text-gray-300">
+                                <div class="w-2 h-2 bg-purple-500 rounded-full mr-2"></div> Cty Cây Xanh Đô Thị (Vendor)
+                            </div>
+                            <div class="gantt-timeline px-1">
+                                <div class="col-start-6 col-span-4 bg-purple-600/30 border border-purple-500/50 border-dashed text-purple-200 font-semibold gantt-bar flex items-center">
+                                    <i data-lucide="scissors" class="w-3 h-3 mr-1.5 opacity-70"></i> Cắt tỉa cây xanh hành lang tuyến D1
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ticket 5: Routine Check / Pending (Bảo dưỡng định kỳ/Chờ thực hiện) -->
+                        <div class="gantt-row hover:bg-white/5 transition-colors border-b border-white/5">
+                            <div class="p-3 border-r border-white/5 text-xs font-medium flex items-center text-gray-300">
+                                <div class="w-2 h-2 bg-yellow-500 rounded-full mr-2"></div> Đội PCCC KCN
+                            </div>
+                            <div class="gantt-timeline px-1">
+                                <div class="col-start-7 col-span-2 bg-yellow-600/20 border border-yellow-500/40 text-yellow-200 font-medium gantt-bar flex items-center">
+                                    <i data-lucide="flame" class="w-3 h-3 mr-1.5 opacity-70"></i> Kiểm tra bình chữa cháy Cụm A
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+
+            document.querySelectorAll('.sidebar-item').forEach(el => {
+                el.classList.remove('sidebar-active');
+            });
+
+            const activeNav = document.getElementById('nav-' + tabId);
+            if(activeNav) activeNav.classList.add('sidebar-active');
+        }
+
+        // Initialize with Inbox
+        switchTab('inbox');
+    </script>
+</body>
+</html>

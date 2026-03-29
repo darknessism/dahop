@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BOS - Executive Command Center</title>
+    
+    <!-- Fonts: Inter & Playfair Display -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,600&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        brand: {
+                            dark: '#050505',
+                            card: 'rgba(255, 255, 255, 0.03)',
+                            border: 'rgba(255, 255, 255, 0.08)',
+                            green: '#00df82', // Xanh lá hiện đại
+                            green_dim: 'rgba(0, 223, 130, 0.15)',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Icons & Charts -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            background-color: #050505;
+            color: #ffffff;
+            overflow: hidden; /* Prevent full body scroll, handle inside layout */
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 1.25rem;
+        }
+
+        .text-gradient {
+            background: linear-gradient(to right, #ffffff, #a0a0a0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 223, 130, 0.5);
+        }
+
+        .pulse-dot {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 223, 130, 0.4); }
+            70% { box-shadow: 0 0 0 6px rgba(0, 223, 130, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 223, 130, 0); }
+        }
+
+        /* Map Placeholder Style */
+        .map-bg {
+            background: radial-gradient(circle at center, rgba(0, 223, 130, 0.05) 0%, transparent 70%),
+                        url('data:image/svg+xml;utf8,<svg width="20" height="20" xmlns="http://www.w3.org/2000/svg"><circle cx="2" cy="2" r="1" fill="rgba(255,255,255,0.05)"/></svg>');
+        }
+    </style>
+</head>
+<body class="h-screen w-screen flex font-sans antialiased text-sm">
+
+    <!-- Sidebar -->
+    <aside class="w-64 border-r border-brand-border flex flex-col justify-between py-6 px-4 shrink-0">
+        <div>
+            <div class="mb-10 px-2">
+                <h1 class="font-serif text-2xl font-bold tracking-wider text-brand-green">DA <span class="text-white">HOP</span></h1>
+                <p class="text-xs text-gray-400 mt-1 uppercase tracking-widest">Command Center</p>
+            </div>
+
+            <nav class="space-y-2">
+                <button onclick="switchTab('home')" id="nav-home" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl bg-brand-green_dim text-brand-green transition-all">
+                    <i data-lucide="globe" class="w-5 h-5"></i>
+                    <span class="font-medium">Tổng Quan</span>
+                </button>
+                <button onclick="switchTab('finance')" id="nav-finance" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-all">
+                    <i data-lucide="line-chart" class="w-5 h-5"></i>
+                    <span class="font-medium">Tài Chính & Dòng Tiền</span>
+                </button>
+                <button onclick="switchTab('fdi')" id="nav-fdi" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-all">
+                    <i data-lucide="building-2" class="w-5 h-5"></i>
+                    <span class="font-medium">FDI & Khách Thuê</span>
+                </button>
+                <button onclick="switchTab('esg')" id="nav-esg" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-all">
+                    <i data-lucide="leaf" class="w-5 h-5"></i>
+                    <span class="font-medium">ESG Monitor</span>
+                </button>
+                <!-- Risk & Compliance Tab -->
+                <button onclick="switchTab('risk')" id="nav-risk" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-all">
+                    <i data-lucide="shield-alert" class="w-5 h-5"></i>
+                    <span class="font-medium">Rủi Ro & Tuân Thủ</span>
+                </button>
+                <button onclick="switchTab('approval')" id="nav-approval" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-all">
+                    <div class="relative">
+                        <i data-lucide="check-square" class="w-5 h-5"></i>
+                        <span class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                    </div>
+                    <span class="font-medium">Phê Duyệt</span>
+                </button>
+            </nav>
+        </div>
+
+        <div class="glass-card p-4 flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-brand-green to-emerald-800 flex items-center justify-center font-serif font-bold">
+                C
+            </div>
+            <div>
+                <p class="text-sm font-semibold">Chủ Tịch</p>
+                <p class="text-xs text-brand-green">🟢 Đang trực tuyến</p>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col overflow-hidden relative">
+        
+        <!-- Header -->
+        <header class="h-20 border-b border-brand-border flex items-center justify-between px-8 shrink-0">
+            <div>
+                <h2 class="font-serif text-2xl text-gradient font-semibold">Chào buổi sáng, Chủ tịch.</h2>
+                <p class="text-gray-400 text-sm mt-1">Hôm nay là Thứ Sáu, Hệ thống đang hoạt động ổn định.</p>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="glass-card px-4 py-2 flex items-center space-x-2 text-sm text-gray-300">
+                    <i data-lucide="calendar" class="w-4 h-4 text-brand-green"></i>
+                    <span>Kỳ báo cáo: Tháng này</span>
+                    <i data-lucide="chevron-down" class="w-4 h-4 ml-2"></i>
+                </div>
+                <button class="glass-card p-2.5 hover:bg-white/10 transition-colors relative">
+                    <i data-lucide="bell" class="w-5 h-5 text-gray-300"></i>
+                    <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full pulse-dot"></span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Content Area -->
+        <div class="flex-1 overflow-y-auto p-8 relative">
+
+            <!-- TAB 1: HOME (Global Command Center) -->
+            <div id="tab-home" class="tab-content h-full flex flex-col gap-6">
+                <!-- Top KPIs -->
+                <div class="grid grid-cols-3 gap-6">
+                    <div class="glass-card p-6 relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-brand-green/5 rounded-full blur-2xl -mr-10 -mt-10 group-hover:bg-brand-green/10 transition-all"></div>
+                        <p class="text-gray-400 text-sm font-medium">Tổng Giá trị Tài sản (AUM)</p>
+                        <div class="mt-2 flex items-baseline space-x-2">
+                            <h3 class="text-3xl font-bold font-inter">15,420</h3>
+                            <span class="text-gray-400">Tỷ VNĐ</span>
+                        </div>
+                        <div class="mt-4 flex items-center text-brand-green text-sm">
+                            <i data-lucide="trending-up" class="w-4 h-4 mr-1"></i>
+                            <span>+4.2% so với quý trước</span>
+                        </div>
+                    </div>
+                    <div class="glass-card p-6 relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-brand-green/5 rounded-full blur-2xl -mr-10 -mt-10 group-hover:bg-brand-green/10 transition-all"></div>
+                        <p class="text-gray-400 text-sm font-medium">Dòng Tiền Ròng (Hôm nay)</p>
+                        <div class="mt-2 flex items-baseline space-x-2">
+                            <h3 class="text-3xl font-bold font-inter text-brand-green">+450</h3>
+                            <span class="text-gray-400">Triệu VNĐ</span>
+                        </div>
+                        <div class="mt-4 flex items-center text-brand-green text-sm">
+                            <i data-lucide="activity" class="w-4 h-4 mr-1"></i>
+                            <span>Real-time từ ERP</span>
+                        </div>
+                    </div>
+                    <div class="glass-card p-6 relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-brand-green/5 rounded-full blur-2xl -mr-10 -mt-10 group-hover:bg-brand-green/10 transition-all"></div>
+                        <p class="text-gray-400 text-sm font-medium">Tỷ Lệ Lấp Đầy Trung Bình</p>
+                        <div class="mt-2 flex items-baseline space-x-2">
+                            <h3 class="text-3xl font-bold font-inter">92.5</h3>
+                            <span class="text-gray-400">%</span>
+                        </div>
+                        <div class="mt-4 flex flex-col gap-1 w-full">
+                            <div class="w-full bg-white/10 rounded-full h-1.5">
+                                <div class="bg-brand-green h-1.5 rounded-full" style="width: 92.5%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Map & Alerts -->
+                <div class="flex-1 grid grid-cols-3 gap-6 min-h-[400px]">
+                    <div class="col-span-2 glass-card p-1 relative overflow-hidden flex flex-col">
+                        <div class="absolute inset-0 map-bg opacity-50 pointer-events-none"></div>
+                        <div class="p-5 border-b border-brand-border flex justify-between items-center z-10">
+                            <h3 class="font-serif text-lg font-semibold">Bản Đồ Dự Án Dạ Hợp</h3>
+                            <div class="flex space-x-2">
+                                <span class="px-2 py-1 rounded bg-white/10 text-xs">Khu Công Nghiệp</span>
+                                <span class="px-2 py-1 rounded bg-white/10 text-xs">Thương Mại & Dịch Vụ</span>
+                            </div>
+                        </div>
+                        <!-- 3D Map Area -->
+                        <div class="flex-1 relative z-10 w-full h-full">
+                            <p class="absolute inset-0 flex items-center justify-center text-gray-600 font-serif italic text-lg opacity-30 pointer-events-none">[ Khu vực hiển thị Bản đồ 3D Interactive ]</p>
+                            
+                            <!-- 12 Locations -->
+                            <div class="absolute top-[15%] left-[15%] flex flex-col items-center cursor-pointer hover:scale-110 transition-transform z-10 hover:z-20">
+                                <div class="w-3.5 h-3.5 bg-red-500 rounded-full shadow-[0_0_12px_rgba(239,68,68,0.8)] pulse-dot"></div>
+                                <span class="mt-1.5 text-[10px] font-semibold bg-black/70 px-1.5 py-0.5 rounded border border-white/10 whitespace-nowrap">KCN Bờ Trái Sông Đà</span>
+                            </div>
+
+                            <div class="absolute top-[25%] left-[35%] flex flex-col items-center cursor-pointer hover:scale-110 transition-transform z-10 hover:z-20">
+                                <div class="w-3.5 h-3.5 bg-blue-400 rounded-full shadow-[0_0_12px_rgba(96,165,250,0.8)] pulse-dot"></div>
+                                <span class="mt-1.5 text-[10px] font-semibold bg-black/70 px-1.5 py-0.5 rounded border border-white/10 whitespace-nowrap">KCN Tiên Tiến</span>
+                            </div>
+
+                            <div class="absolute top-[10%] left-[60%] flex flex-col items-center cursor-pointer hover:scale-110 transition-transform z-10 hover:z-20">
+                                <div class="w-3.5 h-3.5 bg-brand-green rounded-full shadow-[0_0_12px_rgba(0,223,130,0.8)] pulse-dot"></div>
+                                <span class="mt-1.5 text-[10px] font-semibold bg-black/70 px-1.5 py-0.5 rounded border border-white/10 whitespace-nowrap">KCN Thịnh Minh</span>
+                            </div>
+
+                            <div class="absolute top-[40%] left-[10%] flex flex-col items-center cursor-pointer hover:scale-110 transition-transform z-10 hover:z-20">
+                                <div class="w-3.5 h-3.5 bg-yellow-500 rounded-full shadow-[0_0_12px_rgba(234,179,8,0.8)] pulse-dot"></div>
+                                <span class="mt-1.5 text-[10px] font-semibold bg-black/70 px-1.5 py-0.5 rounded border border-white/10 whitespace-nowrap">An Cư Xanh</span>
+                            </div>
+
+                            <div class="absolute top-[45%] left-[70%] flex flex-col items-center cursor-pointer hover:scale-110 transition-transform z-10 hover:z-20">
+                                <div class="w-3.5 h-3.5 bg-purple-500 rounded-full shadow-[0_0_12px_rgba(168,85,247,0.8)] pulse-dot"></div>
+                                <span class="mt-1.5 text-[10px] font-semibold bg-black/70 px-1.5 py-0.5 rounded border border-white/10 whitespace-nowrap">Zen Village</span>
+                            </div>
+
+                            <div class="absolute top-[55%] left-[25%] flex flex-col items-center cursor-pointer hover:scale-110 transition-transform z-10 hover:z-20">
+                                <div class="w-3.5 h-3.5 bg-pink-500 rounded-full shadow-[0_0_12px_rgba(236,72,153,0.8)] pulse-dot"></div>
+                                <span class="mt-1.5 text-[10px] font-semibold bg-black/70 px-1.5 py-0.5 rounded border border-white/10 whitespace-nowrap">DH6</span>
+                            </div>
+
+                            <div class="absolute top-[60%] left-[85%] flex flex-col items-center cursor-pointer hover:scale-110 transition-transform z-10 hover:z-20">
+                                <div class="w-3.5 h-3.5 bg-orange-500 rounded-full shadow-[0_0_12px_rgba(249,115,22,0.8)] pulse-dot"></div>
+                                <span class="mt-1.5 text-[10px] font-semibold bg-black/70 px-1.5 py-0.5 rounded border border-white/10 whitespace-nowrap">DH12</span>
+                            </div>
+
+                            <div class="absolute top-[75%] left-[15%] flex flex-col items-center cursor-pointer hover:scale-110 transition-transform z-10 hover:z-20">
+                                <div class="w-3.5 h-3.5 bg-teal-400 rounded-full shadow-[0_0_12px_rgba(45,212,191,0.8)] pulse-dot"></div>
+                                <span class="mt-1.5 text-[10px] font-semibold bg-black/70 px-1.5 py-0.5 rounded border border-white/10 whitespace-nowrap">DH School</span>
+                            </div>
+
+                            <div class="absolute top-[35%] left-[50%] flex flex-col items-center cursor-pointer hover:scale-110 transition-transform z-10 hover:z-20">
+                                <div class="w-3.5 h-3.5 bg-cyan-400 rounded-full shadow-[0_0_12px_rgba(34,211,238,0.8)] pulse-dot"></div>
+                                <span class="mt-1.5 text-[10px] font-semibold bg-black/70 px-1.5 py-0.5 rounded border border-white/10 whitespace-nowrap">Clean Water Plant</span>
+                            </div>
+
+                            <div class="absolute top-[70%] left-[50%] flex flex-col items-center cursor-pointer hover:scale-110 transition-transform z-10 hover:z-20">
+                                <div class="w-3.5 h-3.5 bg-indigo-500 rounded-full shadow-[0_0_12px_rgba(99,102,241,0.8)] pulse-dot"></div>
+                                <span class="mt-1.5 text-[10px] font-semibold bg-black/70 px-1.5 py-0.5 rounded border border-white/10 whitespace-nowrap">Electricity Power Plant</span>
+                            </div>
+
+                            <div class="absolute top-[85%] left-[40%] flex flex-col items-center cursor-pointer hover:scale-110 transition-transform z-10 hover:z-20">
+                                <div class="w-3.5 h-3.5 bg-lime-400 rounded-full shadow-[0_0_12px_rgba(163,230,53,0.8)] pulse-dot"></div>
+                                <span class="mt-1.5 text-[10px] font-semibold bg-black/70 px-1.5 py-0.5 rounded border border-white/10 whitespace-nowrap">Phu Minh Eco</span>
+                            </div>
+
+                            <div class="absolute top-[80%] left-[75%] flex flex-col items-center cursor-pointer hover:scale-110 transition-transform z-10 hover:z-20">
+                                <div class="w-3.5 h-3.5 bg-fuchsia-500 rounded-full shadow-[0_0_12px_rgba(217,70,239,0.8)] pulse-dot"></div>
+                                <span class="mt-1.5 text-[10px] font-semibold bg-black/70 px-1.5 py-0.5 rounded border border-white/10 whitespace-nowrap">Hoa Lac Digital Office</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Enhanced Live Feed: Smart Operations Center -->
+                    <div class="glass-card flex flex-col">
+                        <div class="p-5 border-b border-brand-border flex flex-col justify-center">
+                            <h3 class="font-serif text-lg font-semibold flex items-center">
+                                <i data-lucide="cctv" class="w-5 h-5 text-brand-green mr-2"></i> TT Vận Hành An Ninh (SOC)
+                            </h3>
+                            <div class="flex space-x-4 mt-3 text-xs">
+                                <span class="flex items-center text-gray-300"><div class="w-2 h-2 rounded-full bg-brand-green mr-1"></div> Camera AI: Active</span>
+                                <span class="flex items-center text-gray-300"><div class="w-2 h-2 rounded-full bg-brand-green mr-1"></div> Báo cháy: Normal</span>
+                            </div>
+                        </div>
+                        <div class="p-5 flex-1 overflow-y-auto space-y-4">
+                            <div class="p-3 bg-brand-green_dim border border-brand-green/30 rounded-lg">
+                                <div class="flex items-center text-brand-green mb-1">
+                                    <i data-lucide="check-circle-2" class="w-4 h-4 mr-1"></i>
+                                    <span class="text-xs font-bold uppercase tracking-wider">Tin Vui - 10 phút trước</span>
+                                </div>
+                                <p class="text-sm">Đối tác FDI Mỹ (Amkor) vừa ký quỹ lô đất 50ha tại KCN Bờ Trái Sông Đà.</p>
+                            </div>
+                            <div class="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+                                <div class="flex items-center text-red-400 mb-1">
+                                    <i data-lucide="alert-triangle" class="w-4 h-4 mr-1"></i>
+                                    <span class="text-xs font-bold uppercase tracking-wider">Cảnh báo IoT - 25 phút trước</span>
+                                </div>
+                                <p class="text-sm">Tủ điện trạm biến áp số 3 nhiệt độ vượt ngưỡng (65°C). Đã điều phối kỹ thuật.</p>
+                            </div>
+                            <div class="p-3 bg-white/5 border border-white/10 rounded-lg">
+                                <div class="flex items-center text-gray-400 mb-1">
+                                    <i data-lucide="file-signature" class="w-4 h-4 mr-1"></i>
+                                    <span class="text-xs font-bold uppercase tracking-wider">Pháp lý - 1 giờ trước</span>
+                                </div>
+                                <p class="text-sm">Đã hoàn tất kiểm toán IFRS 16 cho khối thương mại tháng 10.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: FINANCE -->
+            <div id="tab-finance" class="tab-content hidden h-full flex flex-col gap-6">
+                <div class="grid grid-cols-3 gap-6">
+                    <!-- Waterfall Chart Area -->
+                    <div class="col-span-2 glass-card p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-serif text-lg font-semibold">Cấu Trúc Dòng Tiền & P&L (Tháng này)</h3>
+                            <div class="flex space-x-2">
+                                <button class="px-3 py-1 bg-brand-green text-black rounded text-xs font-semibold">Tất cả</button>
+                                <button class="px-3 py-1 bg-white/10 text-white hover:bg-white/20 rounded text-xs">B2B (Công nghiệp)</button>
+                                <button class="px-3 py-1 bg-white/10 text-white hover:bg-white/20 rounded text-xs">B2C (Thương mại)</button>
+                            </div>
+                        </div>
+                        <div class="h-[300px] w-full">
+                            <canvas id="waterfallChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- AI Forecast & Scenario Modeling -->
+                    <div class="glass-card p-6 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center text-brand-green mb-4">
+                                <i data-lucide="cpu" class="w-5 h-5 mr-2"></i>
+                                <h3 class="font-serif text-lg font-semibold">Dự Báo Ngân Sách AI</h3>
+                            </div>
+                            <p class="text-sm text-gray-400 mb-4">AI dự báo biến động ngân sách (Budget Variance) quý tới dựa trên lịch sử chi phí CAM và chỉ số CPI.</p>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span class="text-gray-300">Kịch bản Lạc Quan</span>
+                                        <span class="text-brand-green font-mono">+12.5%</span>
+                                    </div>
+                                    <div class="w-full bg-white/10 h-1.5 rounded-full"><div class="bg-brand-green h-1.5 rounded-full" style="width: 80%"></div></div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span class="text-gray-300">Kịch bản Cơ Sở</span>
+                                        <span class="text-blue-400 font-mono">+8.2%</span>
+                                    </div>
+                                    <div class="w-full bg-white/10 h-1.5 rounded-full"><div class="bg-blue-400 h-1.5 rounded-full" style="width: 60%"></div></div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span class="text-gray-300">Kịch bản Bi Quan</span>
+                                        <span class="text-red-400 font-mono">-2.1%</span>
+                                    </div>
+                                    <div class="w-full bg-white/10 h-1.5 rounded-full"><div class="bg-red-400 h-1.5 rounded-full" style="width: 30%"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="w-full py-2.5 mt-6 border border-gray-500/30 bg-white/5 text-gray-300 rounded-lg hover:bg-brand-green hover:text-black hover:border-brand-green transition-colors text-sm font-semibold flex justify-center items-center">
+                            <i data-lucide="calculator" class="w-4 h-4 mr-2"></i>
+                            Mô Phỏng Kịch Bản (Scenario Modeling)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Aging Debt Heatmap -->
+                <div class="glass-card p-6 flex-1">
+                    <h3 class="font-serif text-lg font-semibold mb-4">Bản Đồ Nhiệt Công Nợ Khó Đòi (Aging Debt)</h3>
+                    <div class="grid grid-cols-4 gap-4">
+                        <div class="p-4 border border-brand-green/30 bg-brand-green/5 rounded-xl">
+                            <p class="text-xs text-brand-green mb-1 uppercase tracking-wide">Khỏe mạnh</p>
+                            <p class="font-bold text-lg">Dưới 30 ngày</p>
+                            <p class="text-2xl font-mono mt-2 text-white">42 Khách</p>
+                        </div>
+                        <div class="p-4 border border-yellow-500/30 bg-yellow-500/5 rounded-xl">
+                            <p class="text-xs text-yellow-500 mb-1 uppercase tracking-wide">Lưu ý</p>
+                            <p class="font-bold text-lg">30 - 60 ngày</p>
+                            <p class="text-2xl font-mono mt-2 text-white">15 Khách</p>
+                        </div>
+                        <div class="p-4 border border-orange-500/30 bg-orange-500/5 rounded-xl cursor-pointer hover:bg-orange-500/20 transition-colors relative">
+                            <p class="text-xs text-orange-400 mb-1 uppercase tracking-wide">Rủi ro</p>
+                            <p class="font-bold text-lg">60 - 90 ngày</p>
+                            <p class="text-2xl font-mono mt-2 text-white">5 Khách</p>
+                        </div>
+                        <div class="p-4 border border-red-500/50 bg-red-500/10 rounded-xl cursor-pointer hover:bg-red-500/30 transition-colors relative">
+                            <span class="absolute top-2 right-2 flex h-3 w-3">
+                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                              <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                            </span>
+                            <p class="text-xs text-red-500 mb-1 uppercase tracking-wide">Nợ Xấu / Action</p>
+                            <p class="font-bold text-lg">Trên 90 ngày</p>
+                            <p class="text-2xl font-mono mt-2 text-red-400 font-bold">2 Khách (Click)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: FDI & TENANTS -->
+            <div id="tab-fdi" class="tab-content hidden h-full flex flex-col gap-6">
+                <!-- Map / Flow -->
+                <div class="glass-card p-6 h-64 flex flex-col relative overflow-hidden">
+                     <div class="absolute inset-0 map-bg opacity-30 pointer-events-none"></div>
+                     <h3 class="font-serif text-lg font-semibold z-10 mb-2">Bản Đồ Phân Bổ Nguồn Vốn FDI Đa Quốc Gia</h3>
+                     <p class="text-sm text-gray-400 z-10">Luồng vốn đầu tư chiến lược hiện diện tại các hệ sinh thái KCN.</p>
+                     <div class="flex-1 flex items-center justify-around z-10 mt-4">
+                         <div class="text-center"><div class="w-16 h-16 rounded-full border border-white/20 flex items-center justify-center text-xl mb-2">🇺🇸</div><span class="font-mono text-brand-green">35%</span></div>
+                         <div class="h-px w-16 bg-gradient-to-r from-transparent via-brand-green to-transparent"></div>
+                         <div class="text-center"><div class="w-16 h-16 rounded-full border border-brand-green shadow-[0_0_15px_rgba(0,223,130,0.3)] bg-white/5 flex items-center justify-center text-lg font-serif font-bold text-brand-green tracking-tight">DA HOP</div><span class="font-mono text-white text-xs mt-2 block">Vietnam</span></div>
+                         <div class="h-px w-16 bg-gradient-to-r from-transparent via-blue-500 to-transparent"></div>
+                         <div class="text-center"><div class="w-16 h-16 rounded-full border border-white/20 flex items-center justify-center text-xl mb-2">🇯🇵</div><span class="font-mono text-blue-400">42%</span></div>
+                         <div class="h-px w-16 bg-gradient-to-r from-transparent via-red-500 to-transparent"></div>
+                         <div class="text-center"><div class="w-16 h-16 rounded-full border border-white/20 flex items-center justify-center text-xl mb-2">🇰🇷</div><span class="font-mono text-red-400">23%</span></div>
+                     </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-6 flex-1">
+                    <!-- VIP Roster -->
+                    <div class="col-span-2 glass-card p-6">
+                        <h3 class="font-serif text-lg font-semibold mb-6">Khách Hàng VIP (Anchor Tenants) & Health Score</h3>
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="text-gray-400 text-xs uppercase border-b border-white/10">
+                                    <th class="pb-3 font-medium">Tập đoàn</th>
+                                    <th class="pb-3 font-medium">Lĩnh vực</th>
+                                    <th class="pb-3 font-medium">Diện tích thuê</th>
+                                    <th class="pb-3 font-medium text-center">Sức khỏe (SLA)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-white/5">
+                                <tr>
+                                    <td class="py-4 font-semibold flex items-center"><div class="w-8 h-8 rounded bg-white/10 mr-3 flex items-center justify-center text-xs">FOX</div> Foxconn</td>
+                                    <td class="py-4 text-gray-300">Điện tử viễn thông</td>
+                                    <td class="py-4 font-mono">120.000 m²</td>
+                                    <td class="py-4 flex justify-center">
+                                        <div class="w-10 h-10 rounded-full border-4 border-brand-green flex items-center justify-center text-xs font-bold text-brand-green">98%</div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="py-4 font-semibold flex items-center"><div class="w-8 h-8 rounded bg-white/10 mr-3 flex items-center justify-center text-xs">SSG</div> Samsung Elec</td>
+                                    <td class="py-4 text-gray-300">Sản xuất linh kiện</td>
+                                    <td class="py-4 font-mono">250.000 m²</td>
+                                    <td class="py-4 flex justify-center">
+                                        <div class="w-10 h-10 rounded-full border-4 border-brand-green flex items-center justify-center text-xs font-bold text-brand-green">100%</div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="py-4 font-semibold flex items-center"><div class="w-8 h-8 rounded bg-white/10 mr-3 flex items-center justify-center text-xs">LG</div> LG Display</td>
+                                    <td class="py-4 text-gray-300">Màn hình</td>
+                                    <td class="py-4 font-mono">80.000 m²</td>
+                                    <td class="py-4 flex justify-center">
+                                        <!-- Warning ring -->
+                                        <div class="w-10 h-10 rounded-full border-4 border-orange-400 flex items-center justify-center text-xs font-bold text-orange-400">72%</div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Lease Expiry -->
+                    <div class="glass-card p-6">
+                        <h3 class="font-serif text-lg font-semibold mb-4">Biểu Đồ Đáo Hạn (Lease Expiry Cliff)</h3>
+                        <p class="text-xs text-gray-400 mb-6">Tỷ lệ diện tích đến hạn hợp đồng trong 36 tháng tới.</p>
+                        <div class="space-y-5">
+                            <div>
+                                <div class="flex justify-between text-sm mb-2"><span class="font-semibold">12 Tháng</span><span class="font-mono">5%</span></div>
+                                <div class="w-full bg-white/5 h-2 rounded"><div class="bg-gray-400 h-2 rounded" style="width: 5%"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-2"><span class="font-semibold">24 Tháng</span><span class="font-mono text-orange-400">25%</span></div>
+                                <div class="w-full bg-white/5 h-2 rounded"><div class="bg-orange-400 h-2 rounded" style="width: 25%"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-2"><span class="font-semibold">36 Tháng</span><span class="font-mono text-brand-green">60%</span></div>
+                                <div class="w-full bg-white/5 h-2 rounded"><div class="bg-brand-green h-2 rounded" style="width: 60%"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: ESG -->
+            <div id="tab-esg" class="tab-content hidden h-full flex flex-col gap-6">
+                <!-- Top ESG Stats -->
+                <div class="grid grid-cols-4 gap-6">
+                    <div class="glass-card p-5 bg-gradient-to-br from-brand-green/20 to-transparent border-brand-green/30">
+                        <p class="text-brand-green text-xs font-bold uppercase tracking-wide mb-1 flex items-center">
+                            <i data-lucide="coins" class="w-4 h-4 mr-1"></i> Tín Chỉ Carbon
+                        </p>
+                        <h3 class="text-3xl font-mono font-bold">1,250 <span class="text-sm font-sans font-normal text-gray-300">Tín chỉ</span></h3>
+                        <p class="text-xs text-gray-400 mt-2">+150 so với quý trước (Quy đổi: ~$30,000)</p>
+                    </div>
+                    <div class="glass-card p-5">
+                        <p class="text-gray-400 text-xs font-bold uppercase tracking-wide mb-1">Mục Tiêu NetZero</p>
+                        <h3 class="text-3xl font-mono font-bold">2045</h3>
+                        <p class="text-xs text-brand-green mt-2 flex items-center"><i data-lucide="trending-down" class="w-3 h-3 mr-1"></i> Đang bám sát lộ trình</p>
+                    </div>
+                    <div class="glass-card p-5">
+                        <p class="text-gray-400 text-xs font-bold uppercase tracking-wide mb-1">Điện Năng Lượng Mặt Trời</p>
+                        <h3 class="text-3xl font-mono font-bold">14.2 <span class="text-sm font-sans font-normal text-gray-300">MWh</span></h3>
+                        <p class="text-xs text-gray-400 mt-2">Sản xuất trong tháng</p>
+                    </div>
+                    <div class="glass-card p-5">
+                        <p class="text-gray-400 text-xs font-bold uppercase tracking-wide mb-1">Tỷ lệ tái chế chất thải</p>
+                        <h3 class="text-3xl font-mono font-bold">42 <span class="text-sm font-sans font-normal text-gray-300">%</span></h3>
+                        <p class="text-xs text-brand-green mt-2">Vượt mục tiêu đề ra (35%)</p>
+                    </div>
+                </div>
+
+                <!-- Gauges -->
+                <div class="glass-card p-6 grid grid-cols-3 gap-8">
+                    <div class="flex flex-col items-center">
+                        <h3 class="font-serif text-lg font-semibold mb-2">Giảm Phát Thải Carbon</h3>
+                        <p class="text-xs text-gray-400 mb-4">So với base year 2020</p>
+                        <div class="relative w-40 h-40">
+                            <canvas id="gaugeCarbon"></canvas>
+                            <div class="absolute inset-0 flex items-center justify-center flex-col mt-4">
+                                <span class="text-2xl font-bold font-mono text-white">-18%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-center border-x border-white/10">
+                        <h3 class="font-serif text-lg font-semibold mb-2 text-brand-green">Năng Lượng Tái Tạo</h3>
+                        <p class="text-xs text-gray-400 mb-4">DPPA & Solar Mái nhà</p>
+                        <div class="relative w-40 h-40">
+                            <canvas id="gaugeEnergy"></canvas>
+                            <div class="absolute inset-0 flex items-center justify-center flex-col mt-4">
+                                <span class="text-2xl font-bold font-mono text-brand-green">45%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <h3 class="font-serif text-lg font-semibold mb-2 text-blue-400">Tái Sử Dụng Nước</h3>
+                        <p class="text-xs text-gray-400 mb-4">Hệ thống xử lý trung tâm</p>
+                        <div class="relative w-40 h-40">
+                            <canvas id="gaugeWater"></canvas>
+                            <div class="absolute inset-0 flex items-center justify-center flex-col mt-4">
+                                <span class="text-2xl font-bold font-mono text-blue-400">32%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Badges -->
+                <div class="glass-card p-6 flex-1 flex flex-col">
+                    <h3 class="font-serif text-lg font-semibold mb-6 flex items-center">
+                        <i data-lucide="award" class="w-5 h-5 mr-2 text-yellow-500"></i> Thành Tựu & Chứng Chỉ (Compliance Badges)
+                    </h3>
+                    <div class="flex space-x-6 justify-center mt-4">
+                        <div class="flex flex-col items-center p-6 bg-gradient-to-b from-yellow-500/20 to-transparent border border-yellow-500/30 rounded-2xl w-48 text-center shadow-[0_0_20px_rgba(234,179,8,0.1)]">
+                            <i data-lucide="shield-check" class="w-12 h-12 text-yellow-500 mb-4"></i>
+                            <h4 class="font-bold text-lg">LEED Gold</h4>
+                            <p class="text-xs text-gray-400 mt-2">KCN Công Nghệ Cao</p>
+                            <span class="mt-4 text-[10px] bg-yellow-500/20 text-yellow-500 px-2 py-1 rounded">Hiệu lực: 2028</span>
+                        </div>
+                        <div class="flex flex-col items-center p-6 bg-gradient-to-b from-brand-green/20 to-transparent border border-brand-green/30 rounded-2xl w-48 text-center">
+                            <i data-lucide="leaf" class="w-12 h-12 text-brand-green mb-4"></i>
+                            <h4 class="font-bold text-lg">LOTUS Core</h4>
+                            <p class="text-xs text-gray-400 mt-2">Legend City ĐN</p>
+                            <span class="mt-4 text-[10px] bg-brand-green/20 text-brand-green px-2 py-1 rounded">Hiệu lực: 2027</span>
+                        </div>
+                        <div class="flex flex-col items-center p-6 bg-gradient-to-b from-blue-500/20 to-transparent border border-blue-500/30 rounded-2xl w-48 text-center relative overflow-hidden">
+                            <div class="absolute inset-x-0 top-0 h-1 bg-blue-500/50 animate-pulse"></div>
+                            <i data-lucide="globe" class="w-12 h-12 text-blue-400 mb-4"></i>
+                            <h4 class="font-bold text-lg">ISO 14001</h4>
+                            <p class="text-xs text-gray-400 mt-2">Quản lý môi trường</p>
+                            <span class="mt-4 text-[10px] bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-1 rounded">Sắp hết hạn (30 ngày)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 5: RISK & COMPLIANCE -->
+            <div id="tab-risk" class="tab-content hidden h-full flex flex-col gap-6">
+                <!-- Top Risks -->
+                <div class="grid grid-cols-3 gap-6">
+                    <!-- Early Warning System -->
+                    <div class="glass-card p-6 border-red-500/30 bg-gradient-to-br from-red-500/5 to-transparent relative">
+                        <div class="absolute top-4 right-4"><span class="flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span></span></div>
+                        <h3 class="font-serif text-lg font-semibold text-red-400 mb-4 flex items-center">
+                            <i data-lucide="siren" class="w-5 h-5 mr-2"></i> Hệ Thống Cảnh Báo Sớm
+                        </h3>
+                        <div class="space-y-3">
+                            <div class="bg-black/30 p-3 rounded-lg border border-red-500/20">
+                                <p class="text-xs text-gray-400 mb-1">AIoT - Nguy cơ Cháy nổ</p>
+                                <p class="text-sm font-semibold">Trạm biến áp T3 - KCN Bờ Trái Sông Đà nhiệt độ lõi bất thường liên tục 2h.</p>
+                            </div>
+                            <div class="bg-black/30 p-3 rounded-lg border border-orange-500/20">
+                                <p class="text-xs text-gray-400 mb-1">Tài chính - Dòng tiền</p>
+                                <p class="text-sm font-semibold text-orange-400">Dòng tiền âm cục bộ tại Khối TTTM do chậm thanh toán HĐ #892.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Energy Supply Chain Risk (DPPA) -->
+                    <div class="glass-card p-6">
+                        <h3 class="font-serif text-lg font-semibold text-brand-green mb-4 flex items-center">
+                            <i data-lucide="zap" class="w-5 h-5 mr-2"></i> Rủi Ro Chuỗi Cung Ứng Năng Lượng
+                        </h3>
+                        <p class="text-xs text-gray-400 mb-3">Giám sát giá điện thị trường giao ngay (Spot Market / DPPA)</p>
+                        <div class="h-[120px] w-full mb-3">
+                            <canvas id="dppaChart"></canvas>
+                        </div>
+                        <div class="bg-brand-green/10 p-2 rounded text-xs text-brand-green border border-brand-green/20">
+                            <strong>Khuyến nghị AI:</strong> Kích hoạt xả pin lưu trữ (BESS) từ 14h-16h để tránh giá điện Peak.
+                        </div>
+                    </div>
+
+                    <!-- Legal Compliance Monitor -->
+                    <div class="glass-card p-6 flex flex-col">
+                        <h3 class="font-serif text-lg font-semibold text-blue-400 mb-4 flex items-center">
+                            <i data-lucide="scale" class="w-5 h-5 mr-2"></i> Tháp Tuân Thủ Pháp Luật
+                        </h3>
+                        <div class="flex-1 space-y-4">
+                            <div>
+                                <div class="flex justify-between text-sm mb-1"><span class="text-gray-300">Luật Giao dịch điện tử 2024</span><span class="text-brand-green font-mono">100% Đạt</span></div>
+                                <div class="w-full bg-white/5 h-1.5 rounded"><div class="bg-brand-green h-1.5 rounded" style="width: 100%"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-1"><span class="text-gray-300">Thông tư 16 (Phân phối điện)</span><span class="text-brand-green font-mono">100% Đạt</span></div>
+                                <div class="w-full bg-white/5 h-1.5 rounded"><div class="bg-brand-green h-1.5 rounded" style="width: 100%"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-1"><span class="text-gray-300">Quy chuẩn PCCC Mới nhất</span><span class="text-orange-400 font-mono">Cần rà soát (85%)</span></div>
+                                <div class="w-full bg-white/5 h-1.5 rounded"><div class="bg-orange-400 h-1.5 rounded" style="width: 85%"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Audit Trail Oversight -->
+                <div class="glass-card p-6 flex-1 flex flex-col">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-serif text-lg font-semibold">Kiểm Soát Dấu Vết Kiểm Toán (Audit Trail Oversight)</h3>
+                        <button class="text-xs flex items-center bg-white/10 px-3 py-1.5 rounded hover:bg-white/20 transition-colors">
+                            <i data-lucide="download" class="w-3 h-3 mr-1"></i> Xuất Log Big4
+                        </button>
+                    </div>
+                    <div class="flex-1 overflow-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead>
+                                <tr class="text-gray-400 text-xs uppercase border-b border-white/10">
+                                    <th class="pb-3 font-medium">Timestamp (UTC+7)</th>
+                                    <th class="pb-3 font-medium">Hành Động Nhạy Cảm</th>
+                                    <th class="pb-3 font-medium">Người Thực Hiện</th>
+                                    <th class="pb-3 font-medium text-right">Chứng Thực (CA/Hash)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-white/5 font-mono">
+                                <tr>
+                                    <td class="py-3 text-gray-400">2026-03-28 10:15:02</td>
+                                    <td class="py-3">Phê duyệt chi ngân sách CAPEX (2.45 Tỷ VNĐ)</td>
+                                    <td class="py-3 text-brand-green">Board_Director_01</td>
+                                    <td class="py-3 text-right"><span class="bg-brand-green/20 text-brand-green px-2 py-1 rounded text-xs">e-Sign Verified</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3 text-gray-400">2026-03-27 16:40:55</td>
+                                    <td class="py-3">Điều chỉnh cấu trúc phí CAM (-5%) cho HĐ NNN</td>
+                                    <td class="py-3 text-white">Chief_Financial_Officer</td>
+                                    <td class="py-3 text-right"><span class="bg-blue-500/20 text-blue-400 px-2 py-1 rounded text-xs">Hash: 0x8a2f...9c</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3 text-gray-400">2026-03-27 09:22:10</td>
+                                    <td class="py-3">Ký Hợp đồng Thuê KCN Thịnh Minh (Foxconn)</td>
+                                    <td class="py-3 text-white">General_Director</td>
+                                    <td class="py-3 text-right"><span class="bg-brand-green/20 text-brand-green px-2 py-1 rounded text-xs">Level 3 CA Signature</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3 text-gray-400">2026-03-26 14:05:00</td>
+                                    <td class="py-3">Thay đổi quyền truy cập API Ngân hàng</td>
+                                    <td class="py-3 text-orange-400">System_Admin_02</td>
+                                    <td class="py-3 text-right"><span class="bg-yellow-500/20 text-yellow-500 px-2 py-1 rounded text-xs">MFA Authenticated</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 6: APPROVALS -->
+            <div id="tab-approval" class="tab-content hidden h-full flex flex-col items-center justify-center">
+                <!-- Swipe Card Layout -->
+                <div class="w-full max-w-lg">
+                    <div class="text-center mb-6">
+                        <h2 class="font-serif text-2xl font-bold">Trung Tâm Phê Duyệt</h2>
+                        <p class="text-gray-400 mt-1 text-sm">3 Tờ trình khẩn cấp đang chờ chữ ký số CA.</p>
+                    </div>
+
+                    <div class="glass-card p-8 bg-gradient-to-br from-white/10 to-transparent border border-white/20 shadow-2xl relative">
+                        <!-- Card Label -->
+                        <span class="absolute top-0 right-0 bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg rounded-tr-xl">Khẩn Cấp</span>
+                        
+                        <div class="mb-6">
+                            <p class="text-xs text-brand-green tracking-widest uppercase mb-1">Tờ trình số: #REQ-8892</p>
+                            <h3 class="text-xl font-bold">Phê duyệt chi ngân sách sửa Chiller trung tâm Tòa A</h3>
+                            <p class="text-sm text-gray-400 mt-2">Đề xuất bởi: GĐ Vận Hành Kỹ Thuật</p>
+                        </div>
+
+                        <!-- AI Summary -->
+                        <div class="bg-black/50 p-4 rounded-xl border border-white/10 mb-8 space-y-3">
+                            <div class="flex items-start">
+                                <i data-lucide="target" class="w-4 h-4 text-brand-green mt-1 mr-3 shrink-0"></i>
+                                <div><span class="text-gray-400 text-xs block mb-0.5">Xin gì?</span> Thay thế máy nén Chiller số 2 hỏng hóc nặng, không thể sửa.</div>
+                            </div>
+                            <div class="flex items-start">
+                                <i data-lucide="dollar-sign" class="w-4 h-4 text-brand-green mt-1 mr-3 shrink-0"></i>
+                                <div><span class="text-gray-400 text-xs block mb-0.5">Tốn bao nhiêu?</span> <span class="font-mono font-bold">2.450.000.000 VNĐ</span> (Báo giá nhà thầu đính kèm).</div>
+                            </div>
+                            <div class="flex items-start">
+                                <i data-lucide="alert-circle" class="w-4 h-4 text-orange-400 mt-1 mr-3 shrink-0"></i>
+                                <div><span class="text-gray-400 text-xs block mb-0.5">Ngân sách?</span> <span class="text-orange-400 font-semibold">Vượt 15% quỹ dự phòng quý.</span> Đề xuất cấn trừ quỹ CAPEX dự án.</div>
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="flex justify-between items-center gap-4">
+                            <button class="flex-1 py-3 px-4 rounded-xl border border-red-500/50 bg-red-500/10 text-red-400 font-bold hover:bg-red-500 hover:text-white transition-all flex items-center justify-center">
+                                <i data-lucide="x" class="w-5 h-5 mr-2"></i> Từ Chối
+                            </button>
+                            <button class="p-3 rounded-full border border-gray-600 hover:bg-white/10 text-gray-400 transition-all" title="Yêu cầu giải trình bằng giọng nói">
+                                <i data-lucide="mic" class="w-5 h-5"></i>
+                            </button>
+                            <button class="flex-1 py-3 px-4 rounded-xl bg-brand-green text-black font-bold hover:bg-brand-green/80 transition-all flex items-center justify-center shadow-[0_0_15px_rgba(0,223,130,0.4)]">
+                                <i data-lucide="fingerprint" class="w-5 h-5 mr-2"></i> Ký Số & Duyệt
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <p class="text-xs text-gray-500 italic">Vuốt sang phải để Duyệt, Trái để Từ chối trên iPad.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Script to handle Logic & Charts -->
+    <script>
+        // Initialize Icons
+        lucide.createIcons();
+
+        // Simple Tab Switching Logic
+        function switchTab(tabId) {
+            // Hide all contents
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.add('hidden');
+            });
+            // Show selected
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+
+            // Reset Nav styles
+            document.querySelectorAll('.nav-btn').forEach(el => {
+                el.classList.remove('bg-brand-green_dim', 'text-brand-green');
+                el.classList.add('text-gray-400');
+            });
+
+            // Set Active Nav
+            const activeNav = document.getElementById('nav-' + tabId);
+            activeNav.classList.remove('text-gray-400');
+            activeNav.classList.add('bg-brand-green_dim', 'text-brand-green');
+        }
+
+        // Setup Chart.js Defaults for Dark Mode
+        Chart.defaults.color = '#a0a0a0';
+        Chart.defaults.font.family = "'Inter', sans-serif";
+
+        // 1. Finance Waterfall Chart
+        const ctxWaterfall = document.getElementById('waterfallChart').getContext('2d');
+        new Chart(ctxWaterfall, {
+            type: 'bar',
+            data: {
+                labels: ['Tổng Thu', 'OPEX', 'CAPEX', 'Nợ Vay', 'Dòng Tiền'],
+                datasets: [{
+                    label: 'Biến động Dòng Tiền (Tỷ VNĐ)',
+                    data: [1200, -300, -250, -150, 500],
+                    backgroundColor: (ctx) => {
+                        const val = ctx.raw;
+                        if(ctx.dataIndex === 0 || ctx.dataIndex === 4) return '#00df82'; // Green for totals
+                        return 'rgba(239, 68, 68, 0.8)'; // Red for deductions
+                    },
+                    borderRadius: 4,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { 
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        beginAtZero: true 
+                    },
+                    x: { 
+                        grid: { display: false } 
+                    }
+                }
+            }
+        });
+
+        // 2. DPPA Spot Market Risk Chart (Line Chart)
+        const ctxDppa = document.getElementById('dppaChart').getContext('2d');
+        new Chart(ctxDppa, {
+            type: 'line',
+            data: {
+                labels: ['0h', '4h', '8h', '12h', '16h', '20h', '24h'],
+                datasets: [{
+                    label: 'Giá thị trường (VND/kWh)',
+                    data: [1400, 1450, 2100, 2300, 2800, 2600, 1500],
+                    borderColor: '#ef4444', // Red for risk
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 2
+                },
+                {
+                    label: 'Ngân sách chuẩn',
+                    data: [1800, 1800, 1800, 1800, 1800, 1800, 1800],
+                    borderColor: '#00df82',
+                    borderWidth: 1,
+                    borderDash: [5, 5],
+                    fill: false,
+                    pointRadius: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { display: true, grid: { display: false } },
+                    y: { display: false, min: 1000, max: 3000 }
+                }
+            }
+        });
+
+        // 3. ESG Gauge Charts (using Doughnut)
+        const gaugeOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '80%',
+            rotation: -125,
+            circumference: 250,
+            plugins: { tooltip: { enabled: false }, legend: { display: false } }
+        };
+
+        new Chart(document.getElementById('gaugeCarbon').getContext('2d'), {
+            type: 'doughnut',
+            data: { datasets: [{ data: [18, 82], backgroundColor: ['#ffffff', 'rgba(255,255,255,0.1)'], borderWidth: 0, borderRadius: 10 }] },
+            options: gaugeOptions
+        });
+
+        new Chart(document.getElementById('gaugeEnergy').getContext('2d'), {
+            type: 'doughnut',
+            data: { datasets: [{ data: [45, 55], backgroundColor: ['#00df82', 'rgba(255,255,255,0.1)'], borderWidth: 0, borderRadius: 10 }] },
+            options: gaugeOptions
+        });
+
+        new Chart(document.getElementById('gaugeWater').getContext('2d'), {
+            type: 'doughnut',
+            data: { datasets: [{ data: [32, 68], backgroundColor: ['#60a5fa', 'rgba(255,255,255,0.1)'], borderWidth: 0, borderRadius: 10 }] },
+            options: gaugeOptions
+        });
+
+    </script>
+</body>
+</html>
