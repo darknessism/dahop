@@ -368,11 +368,19 @@
             <!-- THE REST OF STRATEGY (Concept, Design, Roadmap applied to DẠ HỢP context) -->
             <!-- I. Concept (DẠ HỢP Context) -->
             <div class="mb-24 mt-10">
-                <div class="flex items-center gap-4 mb-8">
-                    <div class="w-10 h-10 rounded bg-brandGold text-black font-bold text-xl flex items-center justify-center shadow-lg">I</div>
-                    <h3 class="text-2xl md:text-3xl font-bold">Khái Niệm Cốt Lõi Cho DẠ HỢP</h3>
+                <div class="flex flex-col lg:flex-row gap-10 mb-10 items-center">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-4 mb-8">
+                            <div class="w-10 h-10 rounded bg-brandGold text-black font-bold text-xl flex items-center justify-center shadow-lg">I</div>
+                            <h3 class="text-2xl md:text-3xl font-bold">Khái Niệm Cốt Lõi Cho DẠ HỢP</h3>
+                        </div>
+                        <p class="text-gray-400 text-lg leading-relaxed">Với một hệ sinh thái đa ngành bao gồm Bất động sản, Giáo dục, Y tế, và Dịch vụ tiện ích (Điện, Nước), DẠ HỢP đang đối mặt với nguy cơ hình thành các "ốc đảo dữ liệu" nếu tiếp cận theo hướng mua sắm hoặc xây dựng phần mềm đơn lẻ cho từng mảng (Application-Centric).</p>
+                    </div>
+                    <div class="flex-1 w-full relative">
+                        <div class="absolute inset-0 bg-brandGold/20 blur-[50px] rounded-full"></div>
+                        <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=1000&auto=format&fit=crop" class="relative z-10 w-full h-64 object-cover rounded-2xl border border-white/10 shadow-[0_0_30px_rgba(212,175,55,0.15)]" alt="Data Core Concept">
+                    </div>
                 </div>
-                <p class="text-gray-400 mb-10 max-w-4xl text-lg">Với một hệ sinh thái đa ngành bao gồm Bất động sản, Giáo dục, Y tế, và Dịch vụ tiện ích (Điện, Nước), DẠ HỢP đang đối mặt với nguy cơ hình thành các "ốc đảo dữ liệu" nếu tiếp cận theo hướng mua sắm hoặc xây dựng phần mềm đơn lẻ cho từng mảng (Application-Centric).</p>
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <div class="bg-dark-800/80 backdrop-blur border border-white/10 p-8 rounded-2xl hover:border-brandGold/50 transition-all hover:-translate-y-1">
@@ -405,37 +413,53 @@
                     <!-- Business -->
                     <div class="relative group">
                         <div class="absolute inset-0 bg-gradient-to-b from-brandGold/20 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        <div class="relative bg-dark-800 border border-white/10 p-6 rounded-xl h-full">
-                            <h4 class="text-brandGold font-bold mb-3 uppercase tracking-wide text-sm border-b border-white/10 pb-3">1. Business Architecture</h4>
-                            <strong class="text-white block mb-2">Kiến trúc Nghiệp vụ</strong>
-                            <p class="text-sm text-gray-400">Thiết lập đầu tiên. Chuẩn hóa quy trình liên phòng ban từ nhận bàn giao nhà (Zen Village/Muong Central) đến ký hợp đồng điện nước & giáo dục.</p>
+                        <div class="relative bg-dark-800 border border-white/10 rounded-xl h-full overflow-hidden group-hover:border-brandGold/50 transition-colors">
+                            <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=600&auto=format&fit=crop" alt="Business Architecture" class="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:opacity-40 transition-opacity duration-500">
+                            <div class="absolute inset-0 bg-gradient-to-t from-dark-900 via-dark-900/90 to-transparent"></div>
+                            <div class="relative p-6 z-10">
+                                <h4 class="text-brandGold font-bold mb-3 uppercase tracking-wide text-sm border-b border-white/10 pb-3">1. Business Architecture</h4>
+                                <strong class="text-white block mb-2">Kiến trúc Nghiệp vụ</strong>
+                                <p class="text-sm text-gray-400">Thiết lập đầu tiên. Chuẩn hóa quy trình liên phòng ban từ nhận bàn giao nhà (Zen Village/Muong Central) đến ký hợp đồng điện nước & giáo dục.</p>
+                            </div>
                         </div>
                     </div>
                     <!-- Data -->
                     <div class="relative group">
                         <div class="absolute inset-0 bg-gradient-to-b from-brandGreen/20 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        <div class="relative bg-dark-800 border border-white/10 p-6 rounded-xl h-full">
-                            <h4 class="text-brandGreen font-bold mb-3 uppercase tracking-wide text-sm border-b border-white/10 pb-3">2. Data Architecture</h4>
-                            <strong class="text-white block mb-2">Kiến trúc Dữ liệu</strong>
-                            <p class="text-sm text-gray-400">Xây dựng Quản lý Dữ liệu Chủ (MDM) định danh duy nhất Khách hàng, Dịch vụ, Đối tác và 312 nhân sự hiện tại trên toàn hệ sinh thái.</p>
+                        <div class="relative bg-dark-800 border border-white/10 rounded-xl h-full overflow-hidden group-hover:border-brandGreen/50 transition-colors">
+                            <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=600&auto=format&fit=crop" alt="Data Architecture" class="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:opacity-40 transition-opacity duration-500">
+                            <div class="absolute inset-0 bg-gradient-to-t from-dark-900 via-dark-900/90 to-transparent"></div>
+                            <div class="relative p-6 z-10">
+                                <h4 class="text-brandGreen font-bold mb-3 uppercase tracking-wide text-sm border-b border-white/10 pb-3">2. Data Architecture</h4>
+                                <strong class="text-white block mb-2">Kiến trúc Dữ liệu</strong>
+                                <p class="text-sm text-gray-400">Xây dựng Quản lý Dữ liệu Chủ (MDM) định danh duy nhất Khách hàng, Dịch vụ, Đối tác và 312 nhân sự hiện tại trên toàn hệ sinh thái.</p>
+                            </div>
                         </div>
                     </div>
                     <!-- Application -->
                     <div class="relative group">
                         <div class="absolute inset-0 bg-gradient-to-b from-brandGold/20 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        <div class="relative bg-dark-800 border border-white/10 p-6 rounded-xl h-full">
-                            <h4 class="text-brandGold font-bold mb-3 uppercase tracking-wide text-sm border-b border-white/10 pb-3">3. Application Architecture</h4>
-                            <strong class="text-white block mb-2">Kiến trúc Ứng dụng</strong>
-                            <p class="text-sm text-gray-400">Hệ sinh thái ứng dụng (App Cư dân, Phụ huynh, ERP, CRM, Billing) giao tiếp qua API mở. Phục vụ nghiệp vụ và đẩy về Kho dữ liệu chung.</p>
+                        <div class="relative bg-dark-800 border border-white/10 rounded-xl h-full overflow-hidden group-hover:border-brandGold/50 transition-colors">
+                            <img src="https://images.unsplash.com/photo-1551434678-e076c223a692?q=80&w=600&auto=format&fit=crop" alt="Application Architecture" class="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:opacity-40 transition-opacity duration-500">
+                            <div class="absolute inset-0 bg-gradient-to-t from-dark-900 via-dark-900/90 to-transparent"></div>
+                            <div class="relative p-6 z-10">
+                                <h4 class="text-brandGold font-bold mb-3 uppercase tracking-wide text-sm border-b border-white/10 pb-3">3. Application Architecture</h4>
+                                <strong class="text-white block mb-2">Kiến trúc Ứng dụng</strong>
+                                <p class="text-sm text-gray-400">Hệ sinh thái ứng dụng (App Cư dân, Phụ huynh, ERP, CRM, Billing) giao tiếp qua API mở. Phục vụ nghiệp vụ và đẩy về Kho dữ liệu chung.</p>
+                            </div>
                         </div>
                     </div>
                     <!-- Technology -->
                     <div class="relative group">
                         <div class="absolute inset-0 bg-gradient-to-b from-brandGreen/20 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        <div class="relative bg-dark-800 border border-white/10 p-6 rounded-xl h-full">
-                            <h4 class="text-brandGreen font-bold mb-3 uppercase tracking-wide text-sm border-b border-white/10 pb-3">4. Technology Architecture</h4>
-                            <strong class="text-white block mb-2">Kiến trúc Công nghệ</strong>
-                            <p class="text-sm text-gray-400">Hạ tầng Cloud/Hybrid lưu trữ khối lượng lớn dữ liệu từ KCN Bờ trái sông Đà, KCN Thịnh Minh và hệ thống hạ tầng đo đếm điện nước.</p>
+                        <div class="relative bg-dark-800 border border-white/10 rounded-xl h-full overflow-hidden group-hover:border-brandGreen/50 transition-colors">
+                            <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=600&auto=format&fit=crop" alt="Technology Architecture" class="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:opacity-40 transition-opacity duration-500">
+                            <div class="absolute inset-0 bg-gradient-to-t from-dark-900 via-dark-900/90 to-transparent"></div>
+                            <div class="relative p-6 z-10">
+                                <h4 class="text-brandGreen font-bold mb-3 uppercase tracking-wide text-sm border-b border-white/10 pb-3">4. Technology Architecture</h4>
+                                <strong class="text-white block mb-2">Kiến trúc Công nghệ</strong>
+                                <p class="text-sm text-gray-400">Hạ tầng Cloud/Hybrid lưu trữ khối lượng lớn dữ liệu từ KCN Bờ trái sông Đà, KCN Thịnh Minh và hệ thống hạ tầng đo đếm điện nước.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -454,41 +478,59 @@
                     <!-- Phase 1 -->
                     <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
                         <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-dark-900 bg-brandGold text-black font-bold shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-[0_0_15px_rgba(212,175,55,0.5)] z-10">1</div>
-                        <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-dark-800/80 backdrop-blur p-6 rounded-2xl border border-white/10 shadow-xl">
-                            <h4 class="font-bold text-xl text-brandGold mb-2">Giai đoạn 1: Cải thiện nền tảng & Chuyên nghiệp hóa</h4>
-                            <p class="text-sm font-semibold text-white mb-4 italic">Mục tiêu: 100% công việc theo quy trình. 100% nhập dữ liệu vận hành.</p>
-                            <ul class="space-y-2 text-sm text-gray-400">
-                                <li><strong class="text-white">Ban Quản trị Dữ liệu:</strong> Bổ nhiệm CDO, lập Hội đồng dữ liệu đa mảng.</li>
-                                <li><strong class="text-white">Chuẩn hóa Dữ liệu:</strong> Gán Data Ownership, xác định trường dữ liệu trọng yếu (CDE).</li>
-                                <li><strong class="text-white">Quick-wins:</strong> BI Dashboard cho Ban Lãnh đạo, theo dõi dòng tiền, tỷ lệ lấp đầy, hỗ trợ bứt phá doanh số từ 500 tỷ lên 2500 tỷ (2026).</li>
-                            </ul>
+                        <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-dark-800/80 backdrop-blur rounded-2xl border border-white/10 shadow-xl overflow-hidden group-hover:border-brandGold/50 transition-colors">
+                            <div class="h-40 w-full relative overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800&auto=format&fit=crop" class="w-full h-full object-cover opacity-70 group-hover:scale-105 transition-transform duration-700" alt="Phase 1">
+                                <div class="absolute inset-0 bg-gradient-to-t from-dark-800 to-transparent"></div>
+                            </div>
+                            <div class="p-6 pt-2">
+                                <h4 class="font-bold text-xl text-brandGold mb-2">Giai đoạn 1: Cải thiện nền tảng & Chuyên nghiệp hóa</h4>
+                                <p class="text-sm font-semibold text-white mb-4 italic">Mục tiêu: 100% công việc theo quy trình. 100% nhập dữ liệu vận hành.</p>
+                                <ul class="space-y-2 text-sm text-gray-400">
+                                    <li><strong class="text-white">Ban Quản trị Dữ liệu:</strong> Bổ nhiệm CDO, lập Hội đồng dữ liệu đa mảng.</li>
+                                    <li><strong class="text-white">Chuẩn hóa Dữ liệu:</strong> Gán Data Ownership, xác định trường dữ liệu trọng yếu (CDE).</li>
+                                    <li><strong class="text-white">Quick-wins:</strong> BI Dashboard cho Ban Lãnh đạo, theo dõi dòng tiền, tỷ lệ lấp đầy, hỗ trợ bứt phá doanh số từ 500 tỷ lên 2500 tỷ (2026).</li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Phase 2 -->
                     <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
                         <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-dark-900 bg-brandGreen text-black font-bold shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-[0_0_15px_rgba(16,185,129,0.5)] z-10">2</div>
-                        <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-dark-800/80 backdrop-blur p-6 rounded-2xl border border-white/10 shadow-xl">
-                            <h4 class="font-bold text-xl text-brandGreen mb-2">Giai đoạn 2: Nâng cao năng lực & Tích hợp hệ thống</h4>
-                            <p class="text-sm font-semibold text-white mb-4 italic">Mục tiêu: Hiện đại hóa, ứng dụng công nghệ vào quản trị.</p>
-                            <ul class="space-y-2 text-sm text-gray-400">
-                                <li><strong class="text-white">Phổ cập Dữ liệu:</strong> Đào tạo kỹ năng phân tích cho 312 CBNV (Data Democratization).</li>
-                                <li><strong class="text-white">Triển khai Data Platform:</strong> Kho dữ liệu trung tâm, tích hợp IoT tự động từ nhà máy nước, trạm biến áp, trường học và BQL.</li>
-                                <li><strong class="text-white">Từ điển Dữ liệu:</strong> Xây dựng Metadata chuẩn hóa bởi nghiệp vụ.</li>
-                            </ul>
+                        <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-dark-800/80 backdrop-blur rounded-2xl border border-white/10 shadow-xl overflow-hidden group-hover:border-brandGreen/50 transition-colors">
+                            <div class="h-40 w-full relative overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=800&auto=format&fit=crop" class="w-full h-full object-cover opacity-70 group-hover:scale-105 transition-transform duration-700" alt="Phase 2">
+                                <div class="absolute inset-0 bg-gradient-to-t from-dark-800 to-transparent"></div>
+                            </div>
+                            <div class="p-6 pt-2">
+                                <h4 class="font-bold text-xl text-brandGreen mb-2">Giai đoạn 2: Nâng cao năng lực & Tích hợp hệ thống</h4>
+                                <p class="text-sm font-semibold text-white mb-4 italic">Mục tiêu: Hiện đại hóa, ứng dụng công nghệ vào quản trị.</p>
+                                <ul class="space-y-2 text-sm text-gray-400">
+                                    <li><strong class="text-white">Phổ cập Dữ liệu:</strong> Đào tạo kỹ năng phân tích cho 312 CBNV (Data Democratization).</li>
+                                    <li><strong class="text-white">Triển khai Data Platform:</strong> Kho dữ liệu trung tâm, tích hợp IoT tự động từ nhà máy nước, trạm biến áp, trường học và BQL.</li>
+                                    <li><strong class="text-white">Từ điển Dữ liệu:</strong> Xây dựng Metadata chuẩn hóa bởi nghiệp vụ.</li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Phase 3 -->
                     <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
                         <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-dark-900 bg-white text-black font-bold shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-[0_0_15px_rgba(255,255,255,0.5)] z-10">3</div>
-                        <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-dark-800/80 backdrop-blur p-6 rounded-2xl border border-white/10 shadow-xl">
-                            <h4 class="font-bold text-xl text-white mb-2">Giai đoạn 3: Tối ưu hóa & Đổi mới (Innovation)</h4>
-                            <p class="text-sm font-semibold text-brandGold mb-4 italic">Mục tiêu: Kiểm soát quản trị chức năng, hội nhập toàn cầu.</p>
-                            <ul class="space-y-2 text-sm text-gray-400">
-                                <li><strong class="text-white">Advanced Analytics:</strong> Phân tích dự báo tiêu thụ KCN, cá nhân hóa dịch vụ tại Phú Minh Eco-Urban, Muong Central.</li>
-                                <li><strong class="text-white">Data-Driven P&L:</strong> Đóng gói dữ liệu tiêu dùng xanh chứng minh ESG (chuẩn Không carbon tại CCN Tiên Tiến), thu hút FDI quốc tế như dự án Japantown.</li>
-                            </ul>
+                        <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-dark-800/80 backdrop-blur rounded-2xl border border-white/10 shadow-xl overflow-hidden group-hover:border-white/50 transition-colors">
+                            <div class="h-40 w-full relative overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=800&auto=format&fit=crop" class="w-full h-full object-cover opacity-70 group-hover:scale-105 transition-transform duration-700" alt="Phase 3">
+                                <div class="absolute inset-0 bg-gradient-to-t from-dark-800 to-transparent"></div>
+                            </div>
+                            <div class="p-6 pt-2">
+                                <h4 class="font-bold text-xl text-white mb-2">Giai đoạn 3: Tối ưu hóa & Đổi mới (Innovation)</h4>
+                                <p class="text-sm font-semibold text-brandGold mb-4 italic">Mục tiêu: Kiểm soát quản trị chức năng, hội nhập toàn cầu.</p>
+                                <ul class="space-y-2 text-sm text-gray-400">
+                                    <li><strong class="text-white">Advanced Analytics:</strong> Phân tích dự báo tiêu thụ KCN, cá nhân hóa dịch vụ tại Phú Minh Eco-Urban, Muong Central.</li>
+                                    <li><strong class="text-white">Data-Driven P&L:</strong> Đóng gói dữ liệu tiêu dùng xanh chứng minh ESG (chuẩn Không carbon tại CCN Tiên Tiến), thu hút FDI quốc tế như dự án Japantown.</li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
 
@@ -522,6 +564,30 @@
                 </a>
             </div>
 
+            <!-- Banner Minh Họa Hệ Sinh Thái Tổng Thể -->
+            <div class="mt-16 relative rounded-2xl overflow-hidden border border-white/10 shadow-[0_0_40px_rgba(212,175,55,0.15)] group max-w-5xl mx-auto">
+                <div class="absolute inset-0 bg-gradient-to-t from-dark-900 via-dark-900/40 to-transparent z-10"></div>
+                <img src="https://images.unsplash.com/photo-1573164713988-8665fc963095?q=80&w=2000&auto=format&fit=crop" class="w-full h-[300px] md:h-[400px] object-cover group-hover:scale-105 transition-transform duration-700" alt="Proptech Ecosystem">
+                <div class="absolute bottom-6 left-6 right-6 z-20 grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-dark-800/60 backdrop-blur-md border border-white/10 p-4 rounded-xl text-center hover:bg-dark-800/80 transition-colors">
+                        <i data-lucide="smartphone" class="w-6 h-6 text-brandGreen mx-auto mb-2"></i>
+                        <span class="text-xs font-semibold text-white uppercase tracking-wider">Super App (B2C)</span>
+                    </div>
+                    <div class="bg-dark-800/60 backdrop-blur-md border border-white/10 p-4 rounded-xl text-center hover:bg-dark-800/80 transition-colors">
+                        <i data-lucide="building-2" class="w-6 h-6 text-brandGold mx-auto mb-2"></i>
+                        <span class="text-xs font-semibold text-white uppercase tracking-wider">KCN Portal (B2B)</span>
+                    </div>
+                    <div class="bg-dark-800/60 backdrop-blur-md border border-white/10 p-4 rounded-xl text-center hover:bg-dark-800/80 transition-colors">
+                        <i data-lucide="cpu" class="w-6 h-6 text-blue-400 mx-auto mb-2"></i>
+                        <span class="text-xs font-semibold text-white uppercase tracking-wider">IoT & Smart Grid</span>
+                    </div>
+                    <div class="bg-dark-800/60 backdrop-blur-md border border-white/10 p-4 rounded-xl text-center hover:bg-dark-800/80 transition-colors">
+                        <i data-lucide="database" class="w-6 h-6 text-purple-400 mx-auto mb-2"></i>
+                        <span class="text-xs font-semibold text-white uppercase tracking-wider">Data Lake Central</span>
+                    </div>
+                </div>
+            </div>
+
             <!-- NỘI DUNG MỚI ĐƯỢC THÊM VÀO ĐÂY -->
             <div class="mt-20 text-left bg-dark-800/30 border border-white/10 rounded-2xl p-6 md:p-10 backdrop-blur-sm">
                 <div class="flex items-center gap-3 mb-6">
@@ -541,50 +607,71 @@
                     </p>
                 </div>
 
-                <div class="overflow-x-auto mb-8 rounded-xl border border-white/10 bg-dark-900/50">
-                    <table class="w-full text-left border-collapse min-w-[800px]">
-                        <thead>
-                            <tr class="border-b border-white/10 bg-black/40 text-brandGold text-xs uppercase tracking-wider">
-                                <th class="py-5 px-6 w-1/4 font-semibold">Tầng Kiến Trúc<br><span class="text-gray-500 font-normal normal-case mt-1 block">Architecture Layers</span></th>
-                                <th class="py-5 px-6 w-2/4 font-semibold">Chức Năng Và Thành Phần Cốt Lõi</th>
-                                <th class="py-5 px-6 w-1/4 font-semibold">Đặc Trưng Công Nghệ Áp Dụng</th>
-                            </tr>
-                        </thead>
-                        <tbody class="text-sm text-gray-300 divide-y divide-white/5">
-                            <tr class="hover:bg-white/5 transition-colors">
-                                <td class="py-5 px-6 align-top">
-                                    <strong class="text-white text-base block mb-1">Tầng Giao Tiếp Người Dùng</strong>
-                                    <span class="text-xs text-brandGreen font-medium uppercase tracking-wider">Presentation Layer</span>
-                                </td>
-                                <td class="py-5 px-6 align-top leading-relaxed">Cung cấp giao diện tương tác cho các nhóm người dùng khác nhau bao gồm ứng dụng di động cho cư dân, cổng thông tin web cho doanh nghiệp, và ứng dụng chuyên dụng cho kỹ thuật viên hiện trường.</td>
-                                <td class="py-5 px-6 align-top leading-relaxed">Phát triển đa nền tảng (iOS, Android, Web), tối ưu hóa trải nghiệm người dùng (UX/UI), hỗ trợ chế độ ngoại tuyến (offline mode) cho ứng dụng bảo trì.<sup>15</sup></td>
-                            </tr>
-                            <tr class="hover:bg-white/5 transition-colors">
-                                <td class="py-5 px-6 align-top">
-                                    <strong class="text-white text-base block mb-1">Tầng Logic Nghiệp Vụ</strong>
-                                    <span class="text-xs text-brandGreen font-medium uppercase tracking-wider">Business Logic Layer</span>
-                                </td>
-                                <td class="py-5 px-6 align-top leading-relaxed">Xử lý các quy tắc kinh doanh, thuật toán tính toán tài chính phức tạp (như phân bổ phí CAM, điều chỉnh giá thuê theo CPI), tự động hóa luồng công việc (workflows) và phân quyền truy cập.<sup>11</sup></td>
-                                <td class="py-5 px-6 align-top leading-relaxed">Công cụ quy tắc (Rules Engine), tự động hóa quy trình bằng robot (RPA), xử lý sự kiện phức tạp (CEP) và trí tuệ nhân tạo (AI) định tuyến công việc.<sup>11</sup></td>
-                            </tr>
-                            <tr class="hover:bg-white/5 transition-colors">
-                                <td class="py-5 px-6 align-top">
-                                    <strong class="text-white text-base block mb-1">Tầng Tích Hợp Và Mở Rộng</strong>
-                                    <span class="text-xs text-brandGreen font-medium uppercase tracking-wider">Integration & API Layer</span>
-                                </td>
-                                <td class="py-5 px-6 align-top leading-relaxed">Đóng vai trò là cầu nối giữa các module nội bộ và các dịch vụ của bên thứ ba. Quản lý việc truyền tải dữ liệu, giới hạn tốc độ gọi API (rate limits), và bảo mật điểm cuối.<sup>18</sup></td>
-                                <td class="py-5 px-6 align-top leading-relaxed">API RESTful, GraphQL, Webhooks, cơ chế trao đổi dữ liệu điện tử (EDI), tích hợp các giao thức IoT công nghiệp như MQTT.<sup>6</sup></td>
-                            </tr>
-                            <tr class="hover:bg-white/5 transition-colors">
-                                <td class="py-5 px-6 align-top">
-                                    <strong class="text-white text-base block mb-1">Tầng Quản Trị Dữ Liệu</strong>
-                                    <span class="text-xs text-brandGreen font-medium uppercase tracking-wider">Data Layer</span>
-                                </td>
-                                <td class="py-5 px-6 align-top leading-relaxed">Lưu trữ tập trung mọi dữ liệu từ thông tin khách hàng, lịch sử thanh toán, bản ghi bảo trì, đến dữ liệu chuỗi thời gian (time-series data) từ các cảm biến đo lường tiện ích.</td>
-                                <td class="py-5 px-6 align-top leading-relaxed">Hồ dữ liệu (Data Lakes), cơ sở dữ liệu quan hệ và phi quan hệ, kho dữ liệu đám mây với khả năng mã hóa và đáp ứng các tiêu chuẩn bảo mật dữ liệu.<sup>22</sup></td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <!-- Visual Architecture Cards (Replaces Table) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 text-left">
+                    <!-- Presentation Layer -->
+                    <div class="group relative rounded-xl overflow-hidden border border-white/10 bg-dark-900/80 hover:border-brandGreen/50 transition-colors flex flex-col h-full shadow-lg">
+                        <div class="h-40 md:h-48 relative overflow-hidden shrink-0">
+                            <img src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?q=80&w=800&auto=format&fit=crop" class="w-full h-full object-cover opacity-40 group-hover:scale-105 group-hover:opacity-60 transition-all duration-500" alt="Presentation Layer">
+                            <div class="absolute inset-0 bg-gradient-to-t from-dark-900 to-transparent"></div>
+                            <div class="absolute bottom-4 left-5 right-5">
+                                <span class="text-[10px] font-bold text-brandGreen uppercase tracking-widest bg-brandGreen/10 px-2 py-1 rounded border border-brandGreen/20 mb-2 inline-block">Presentation Layer</span>
+                                <h4 class="text-white text-lg font-bold font-serif">Tầng Giao Tiếp Người Dùng</h4>
+                            </div>
+                        </div>
+                        <div class="p-5 flex-1 flex flex-col gap-3">
+                            <p class="text-sm text-gray-300 leading-relaxed"><strong class="text-white">Chức năng:</strong> Cung cấp giao diện tương tác cho các nhóm người dùng khác nhau bao gồm App di động cư dân, cổng thông tin doanh nghiệp, và App kỹ thuật viên hiện trường.</p>
+                            <p class="text-xs text-gray-400 leading-relaxed mt-auto pt-3 border-t border-white/5"><strong class="text-gray-200">Công nghệ:</strong> Đa nền tảng (iOS, Android, Web), tối ưu UX/UI, hỗ trợ chế độ ngoại tuyến (offline mode) cho bảo trì.<sup>15</sup></p>
+                        </div>
+                    </div>
+
+                    <!-- Business Logic Layer -->
+                    <div class="group relative rounded-xl overflow-hidden border border-white/10 bg-dark-900/80 hover:border-brandGold/50 transition-colors flex flex-col h-full shadow-lg">
+                        <div class="h-40 md:h-48 relative overflow-hidden shrink-0">
+                            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800&auto=format&fit=crop" class="w-full h-full object-cover opacity-40 group-hover:scale-105 group-hover:opacity-60 transition-all duration-500" alt="Business Logic">
+                            <div class="absolute inset-0 bg-gradient-to-t from-dark-900 to-transparent"></div>
+                            <div class="absolute bottom-4 left-5 right-5">
+                                <span class="text-[10px] font-bold text-brandGold uppercase tracking-widest bg-brandGold/10 px-2 py-1 rounded border border-brandGold/20 mb-2 inline-block">Business Logic Layer</span>
+                                <h4 class="text-white text-lg font-bold font-serif">Tầng Logic Nghiệp Vụ</h4>
+                            </div>
+                        </div>
+                        <div class="p-5 flex-1 flex flex-col gap-3">
+                            <p class="text-sm text-gray-300 leading-relaxed"><strong class="text-white">Chức năng:</strong> Xử lý quy tắc kinh doanh, thuật toán tài chính phức tạp (phân bổ phí CAM, giá thuê theo CPI), tự động hóa luồng công việc và phân quyền truy cập.<sup>11</sup></p>
+                            <p class="text-xs text-gray-400 leading-relaxed mt-auto pt-3 border-t border-white/5"><strong class="text-gray-200">Công nghệ:</strong> Rules Engine, tự động hóa quy trình bằng robot (RPA), xử lý sự kiện phức tạp (CEP) và AI định tuyến công việc.<sup>11</sup></p>
+                        </div>
+                    </div>
+
+                    <!-- Integration & API Layer -->
+                    <div class="group relative rounded-xl overflow-hidden border border-white/10 bg-dark-900/80 hover:border-blue-400/50 transition-colors flex flex-col h-full shadow-lg">
+                        <div class="h-40 md:h-48 relative overflow-hidden shrink-0">
+                            <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=800&auto=format&fit=crop" class="w-full h-full object-cover opacity-40 group-hover:scale-105 group-hover:opacity-60 transition-all duration-500" alt="Integration API">
+                            <div class="absolute inset-0 bg-gradient-to-t from-dark-900 to-transparent"></div>
+                            <div class="absolute bottom-4 left-5 right-5">
+                                <span class="text-[10px] font-bold text-blue-400 uppercase tracking-widest bg-blue-400/10 px-2 py-1 rounded border border-blue-400/20 mb-2 inline-block">Integration Layer</span>
+                                <h4 class="text-white text-lg font-bold font-serif">Tầng Tích Hợp Và Mở Rộng</h4>
+                            </div>
+                        </div>
+                        <div class="p-5 flex-1 flex flex-col gap-3">
+                            <p class="text-sm text-gray-300 leading-relaxed"><strong class="text-white">Chức năng:</strong> Cầu nối giữa các module nội bộ và dịch vụ bên thứ ba. Quản lý việc truyền tải dữ liệu, giới hạn tốc độ gọi API (rate limits), và bảo mật điểm cuối.<sup>18</sup></p>
+                            <p class="text-xs text-gray-400 leading-relaxed mt-auto pt-3 border-t border-white/5"><strong class="text-gray-200">Công nghệ:</strong> API RESTful, GraphQL, Webhooks, cơ chế trao đổi điện tử (EDI), tích hợp các giao thức IoT công nghiệp như MQTT.<sup>6</sup></p>
+                        </div>
+                    </div>
+
+                    <!-- Data Layer -->
+                    <div class="group relative rounded-xl overflow-hidden border border-white/10 bg-dark-900/80 hover:border-purple-400/50 transition-colors flex flex-col h-full shadow-lg">
+                        <div class="h-40 md:h-48 relative overflow-hidden shrink-0">
+                            <img src="https://images.unsplash.com/photo-1544197150-b99a580bb7a8?q=80&w=800&auto=format&fit=crop" class="w-full h-full object-cover opacity-40 group-hover:scale-105 group-hover:opacity-60 transition-all duration-500" alt="Data Layer">
+                            <div class="absolute inset-0 bg-gradient-to-t from-dark-900 to-transparent"></div>
+                            <div class="absolute bottom-4 left-5 right-5">
+                                <span class="text-[10px] font-bold text-purple-400 uppercase tracking-widest bg-purple-400/10 px-2 py-1 rounded border border-purple-400/20 mb-2 inline-block">Data Layer</span>
+                                <h4 class="text-white text-lg font-bold font-serif">Tầng Quản Trị Dữ Liệu</h4>
+                            </div>
+                        </div>
+                        <div class="p-5 flex-1 flex flex-col gap-3">
+                            <p class="text-sm text-gray-300 leading-relaxed"><strong class="text-white">Chức năng:</strong> Lưu trữ tập trung mọi dữ liệu từ thông tin khách hàng, lịch sử thanh toán, bản ghi bảo trì, đến dữ liệu chuỗi thời gian (time-series) từ cảm biến.</p>
+                            <p class="text-xs text-gray-400 leading-relaxed mt-auto pt-3 border-t border-white/5"><strong class="text-gray-200">Công nghệ:</strong> Hồ dữ liệu (Data Lakes), CSDL quan hệ/phi quan hệ, kho dữ liệu đám mây với khả năng mã hóa chuẩn bảo mật cao.<sup>22</sup></p>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="flex items-start gap-4 bg-brandGreen/5 border border-brandGreen/20 p-5 rounded-xl">
@@ -1023,7 +1110,7 @@
                 <div class="col-span-1 md:col-span-2">
                     <div class="flex items-center gap-2 mb-4">
                         <i data-lucide="hexagon" class="text-brandGold w-8 h-8"></i>
-                        <span class="font-bold text-xl uppercase tracking-wider">DẠ HỢP<span class="text-brandGreen">Prop</span></span>
+                        <span class="font-bold text-xl uppercase tracking-wider">DẠ HỢP <span class="text-brandGreen">PROPTECH</span></span>
                     </div>
                     <p class="text-gray-400 text-sm max-w-sm mb-6">
                         Tiên phong chuyển đổi số quản lý bất động sản đa phân khúc. Giải quyết triệt để bài toán tối ưu chi phí vận hành (OpEx) và chuẩn bị dữ liệu cho kỷ nguyên AI.
@@ -1037,10 +1124,10 @@
                 <div>
                     <h4 class="font-semibold text-white mb-4 uppercase tracking-wider text-sm font-serif">Phân Hệ Cốt Lõi</h4>
                     <ul class="space-y-2 text-sm text-gray-400">
-                        <li><a href="#" class="hover:text-brandGold transition">Tài chính & Kế toán (CRE)</a></li>
-                        <li><a href="#" class="hover:text-brandGold transition">Vận hành & Bảo trì (CMMS)</a></li>
-                        <li><a href="#" class="hover:text-brandGold transition">Tiện ích & Năng lượng (IoT)</a></li>
-                        <li><a href="#" class="hover:text-brandGold transition">Sales & Leasing (CRM)</a></li>
+                        <li><a href="#" class="hover:text-brandGold transition">Kiến trúc Nghiệp vụ (Business Architecture)</a></li>
+                        <li><a href="#" class="hover:text-brandGold transition">Kiến trúc Dữ liệu (Data Architecture)</a></li>
+                        <li><a href="#" class="hover:text-brandGold transition">Kiến trúc Ứng dụng (Application Architecture)</a></li>
+                        <li><a href="#" class="hover:text-brandGold transition">Kiến trúc Công nghệ (Technology Architecture)</a></li>
                     </ul>
                 </div>
                 <div>
@@ -1048,11 +1135,11 @@
                     <ul class="space-y-3 text-sm text-gray-400">
                         <li class="flex items-start gap-2">
                             <i data-lucide="map-pin" class="w-4 h-4 text-brandGreen shrink-0 mt-0.5"></i>
-                            Tòa nhà Tech Hub, Quận 1, TP. HCM
+                            Charmvit Building, 117 Trần Duy Hưng, Cầu Giấy, Hà Nội
                         </li>
                         <li class="flex items-center gap-2">
                             <i data-lucide="phone" class="w-4 h-4 text-brandGreen"></i>
-                            1900 xxxx
+                            090 174 0904
                         </li>
                     </ul>
                 </div>
