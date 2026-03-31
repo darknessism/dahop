@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DẠ HỢP - Lean Team Strategy & AI Workflow</title>
+    
+    <!-- Fonts: Inter & Playfair Display -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Tailwind Config for Fonts & Colors -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        brand: {
+                            dark: '#0f172a',    // slate-900
+                            card: '#1e293b',    // slate-800
+                            primary: '#10b981', // emerald-500
+                            accent: '#8b5cf6',  // violet-500
+                            glow: '#34d399',    // emerald-400
+                        }
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'flow': 'flow 2s linear infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        flow: {
+                            '0%': { transform: 'translateX(-5px)', opacity: 0.5 },
+                            '50%': { opacity: 1 },
+                            '100%': { transform: 'translateX(5px)', opacity: 0.5 },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Styles & Animations */
+        body { background-color: #04060b; color: #cbd5e1; overflow-x: hidden; }
+        
+        /* Glassmorphism */
+        .glass {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        /* Gradients */
+        .text-gradient {
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-image: linear-gradient(to right, #34d399, #3b82f6);
+        }
+        .text-gradient-accent {
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-image: linear-gradient(to right, #a855f7, #ec4899);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) { .chart-container { height: 350px; } }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+        /* Role Buttons Active State */
+        .role-btn { transition: all 0.3s ease; position: relative; overflow: hidden; }
+        .role-btn::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 0; height: 100%;
+            background: linear-gradient(90deg, rgba(16, 185, 129, 0.1) 0%, transparent 100%);
+            transition: width 0.3s ease; z-index: 0;
+        }
+        .role-btn:hover::before { width: 100%; }
+        .role-btn > * { position: relative; z-index: 1; }
+        .role-btn.active {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.2) inset;
+        }
+        .role-btn.active-b {
+            border-color: #8b5cf6;
+            background: rgba(139, 92, 246, 0.1);
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.2) inset;
+        }
+
+        /* Scroll Reveal Animation */
+        .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out; }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+        
+        /* Image Overlay */
+        .img-overlay::after {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(to top, #0f172a 0%, transparent 100%);
+        }
+
+        /* Flow Diagram CSS Lines */
+        .flow-line {
+            position: relative;
+        }
+        .flow-line::after {
+            content: '';
+            position: absolute;
+            background: rgba(52, 211, 153, 0.3);
+            z-index: -1;
+        }
+    </style>
+</head>
+<body class="font-sans">
+
+    <!-- Chosen Palette: Slate (900/800) for deep dark mode background. Emerald (500/400) for Data-centric elements & growth vibes. Violet/Fuchsia for Application elements & startup energy. -->
+    
+    <!-- Application Structure Plan: 
+    1. Hero Section: Sets the stage.
+    2. Executive Summary / Explorer: Details the 7 roles.
+    3. Analytics: Budget and Team structure.
+    4. CTO View (NEW): Explains HOW they work together using an HTML CSS diagram. Explains WHY AI makes them 5x faster using comparative cards.
+    5. Execution Roadmap: Agile timeline.
+    -->
+    
+    <!-- Visualization & Content Choices:
+    1. Workflow Diagram: Goal - Show team synergy. Method - HTML/Tailwind Grid with Unicode arrows (NO SVG). Justification - Keeps the app lightweight, interactive, and perfectly integrates into the dark mode styling.
+    2. AI vs Traditional Comparison: Goal - Prove the 5x ROI. Method - Side-by-side glass cards. Justification - Clear contrast highlighting time saved and bottlenecks removed.
+    -->
+    
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. HTML/CSS only for diagrams. -->
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass border-b border-slate-700/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl animate-pulse">🚀</span>
+                <h1 class="text-xl font-bold font-serif text-white tracking-wider">DẠ HỢP   <span class="text-gradient">TRANSFORMATION LEAN TEAM</span></h1>
+            </div>
+            <div class="hidden md:flex gap-6 font-medium text-sm text-slate-300">
+                <a href="#vision" class="hover:text-brand-primary transition-colors">Tầm Nhìn</a>
+                <a href="#explorer" class="hover:text-brand-primary transition-colors">Đội Ngũ</a>
+                <a href="#data-business" class="hover:text-brand-primary transition-colors">Vận Hành Số</a>
+                <a href="#cto-view" class="hover:text-brand-primary transition-colors text-white font-bold bg-slate-800/50 px-3 py-1 rounded-full border border-slate-700">CTO View & AI</a>
+                <a href="#roadmap" class="hover:text-brand-primary transition-colors">Lộ Trình</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="vision" class="relative min-h-[85vh] flex items-center justify-center overflow-hidden pt-16">
+        <!-- Background Image -->
+        <div class="absolute inset-0 z-0 opacity-20">
+            <img src="https://images.unsplash.com/photo-1504384764586-bb4cdc1707b0?q=80&w=2070&auto=format&fit=crop" alt="Modern Tech Workspace" class="w-full h-full object-cover" />
+            <div class="absolute inset-0 bg-gradient-to-b from-transparent to-brand-dark"></div>
+        </div>
+        
+        <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-brand-primary/20 rounded-full blur-[100px] animate-pulse-slow z-0"></div>
+        <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-brand-accent/20 rounded-full blur-[100px] animate-pulse-slow z-0" style="animation-delay: 2s;"></div>
+
+        <div class="relative z-10 max-w-5xl mx-auto px-4 text-center">
+            <span class="inline-block py-1 px-3 rounded-full bg-slate-800 border border-slate-700 text-brand-primary text-sm font-semibold mb-6 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
+                Data-Centric Strategy
+            </span>
+            <h1 class="text-5xl md:text-7xl font-bold font-serif text-white mb-6 leading-tight">
+                Xây Dựng Đội Ngũ <br />
+                <span class="text-gradient">Tinh Gọn & Bứt Phá</span>
+            </h1>
+            <p class="text-lg md:text-xl text-slate-400 mb-10 max-w-3xl mx-auto leading-relaxed">
+                Phá bỏ các dự án IT đơn lẻ, cồng kềnh, không đồng nhất và có tính kế thừa. Xây dựng một Lean Team linh hoạt, chia làm 2 mũi nhọn độc lập: <strong>Hạ tầng Dữ liệu</strong> vững chắc và <strong>Ứng dụng Công nghệ</strong> tốc độ cao, sẵn sàng phục vụ Chiến lược Kinh Doanh và Vận Hành.
+            </p>
+            <a href="#explorer" class="inline-flex items-center gap-2 bg-brand-primary hover:bg-emerald-400 text-slate-900 font-bold py-3 px-8 rounded-full transition-all transform hover:scale-105 shadow-[0_0_20px_rgba(16,185,129,0.4)]">
+                Khám Phá Đội Ngũ <span>↓</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- Interactive Role Explorer -->
+    <section id="explorer" class="py-20 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 reveal">
+                <h2 class="text-3xl md:text-4xl font-bold font-serif text-white mb-4">Mô Hình <span class="text-gradient">Tổ Chức Nhân Sự</span></h2>
+                <p class="text-slate-400 max-w-2xl mx-auto">Cấu trúc chia làm 2 nhóm rõ rệt. Tương tác trực tiếp để xem chi tiết yêu cầu, đánh giá và mức ngân sách cập nhật cho từng vị trí.</p>
+            </div>
+
+            <div class="flex flex-col lg:flex-row gap-8">
+                <!-- Left: Navigation Panel -->
+                <div class="w-full lg:w-1/3 space-y-8 reveal">
+                    <!-- Group A -->
+                    <div class="glass p-6 rounded-2xl border border-emerald-900/50">
+                        <h3 class="text-emerald-400 font-serif text-xl font-bold mb-4 border-b border-emerald-900/50 pb-2 flex items-center gap-2">
+                            <span>📊</span> Nhóm A: Dữ Liệu
+                        </h3>
+                        <div class="flex flex-col gap-3">
+                            <button onclick="updateRole('de')" id="btn-de" class="role-btn active w-full text-left px-4 py-3 rounded-xl border border-slate-700 bg-slate-800/50 text-slate-200 font-medium">1. Data Engineer</button>
+                            <button onclick="updateRole('ba')" id="btn-ba" class="role-btn w-full text-left px-4 py-3 rounded-xl border border-slate-700 bg-slate-800/50 text-slate-200 font-medium">2. Data Business Analyst</button>
+                            <button onclick="updateRole('bi')" id="btn-bi" class="role-btn w-full text-left px-4 py-3 rounded-xl border border-slate-700 bg-slate-800/50 text-slate-200 font-medium">3. BI Developer</button>
+                            <button onclick="updateRole('do')" id="btn-do" class="role-btn w-full text-left px-4 py-3 rounded-xl border border-slate-700 bg-slate-800/50 text-slate-200 font-medium">4. Data Owner</button>
+                        </div>
+                    </div>
+
+                    <!-- Group B -->
+                    <div class="glass p-6 rounded-2xl border border-violet-900/50">
+                        <h3 class="text-violet-400 font-serif text-xl font-bold mb-4 border-b border-violet-900/50 pb-2 flex items-center gap-2">
+                            <span>💻</span> Nhóm B: Ứng Dụng
+                        </h3>
+                        <div class="flex flex-col gap-3">
+                            <button onclick="updateRole('be')" id="btn-be" class="role-btn w-full text-left px-4 py-3 rounded-xl border border-slate-700 bg-slate-800/50 text-slate-200 font-medium group-b">5. Backend Developer</button>
+                            <button onclick="updateRole('fe')" id="btn-fe" class="role-btn w-full text-left px-4 py-3 rounded-xl border border-slate-700 bg-slate-800/50 text-slate-200 font-medium group-b">6. Frontend Developer</button>
+                            <button onclick="updateRole('devops')" id="btn-devops" class="role-btn w-full text-left px-4 py-3 rounded-xl border border-slate-700 bg-slate-800/50 text-slate-200 font-medium group-b">7. DevOps / Cloud</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Content Display Panel -->
+                <div class="w-full lg:w-2/3 reveal" style="transition-delay: 200ms;">
+                    <div class="glass rounded-3xl border border-slate-700 overflow-hidden relative min-h-[600px] flex flex-col shadow-2xl">
+                        
+                        <!-- Dynamic Header Image -->
+                        <div class="h-48 w-full relative img-overlay">
+                            <img id="detail-img" src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop" alt="Role Background" class="w-full h-full object-cover opacity-60 transition-opacity duration-500" />
+                            
+                            <div class="absolute bottom-4 left-6 z-10">
+                                <span id="detail-badge" class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 border border-emerald-500 text-emerald-300 mb-2 backdrop-blur-md">
+                                    Hạ Tầng Dữ Liệu
+                                </span>
+                                <h3 id="detail-title" class="text-3xl md:text-4xl font-bold font-serif text-white tracking-wide shadow-sm">
+                                    Data Engineer
+                                </h3>
+                            </div>
+                        </div>
+
+                        <!-- Content Body -->
+                        <div class="p-6 md:p-8 flex-1 flex flex-col gap-8">
+                            
+                            <!-- Budget Row -->
+                            <div class="flex items-center justify-between bg-slate-800/50 p-4 rounded-2xl border border-slate-700">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 rounded-full bg-slate-700 flex items-center justify-center text-xl">💰</div>
+                                    <div>
+                                        <p class="text-sm text-slate-400 font-medium">Ngân sách dự kiến</p>
+                                        <p class="text-xs text-slate-500">Mức lương hàng tháng</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p id="detail-salary" class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-orange-500 drop-shadow-md">
+                                        12 - 20 Triệu
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Evaluation Section -->
+                            <div>
+                                <h4 class="font-serif font-bold text-xl text-white mb-3 flex items-center gap-2">
+                                    <span>💡</span> Đánh Giá Chiến Lược
+                                </h4>
+                                <p id="detail-eval" class="text-slate-300 leading-relaxed bg-brand-dark/50 p-5 rounded-xl border-l-4 border-emerald-500">
+                                    Là "thợ ống nước" của hệ thống. Chịu trách nhiệm thiết lập Airbyte, quản trị quyền truy cập trên BigQuery/Azure SQL (postgres as db for sandbox).
+                                </p>
+                            </div>
+
+                            <!-- Responsibilities List -->
+                            <div>
+                                <h4 class="font-serif font-bold text-xl text-white mb-3 flex items-center gap-2">
+                                    <span>⚙️</span> Trách Nhiệm Cốt Lõi
+                                </h4>
+                                <ul id="detail-resp" class="space-y-3">
+                                    <!-- Populated by JS -->
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Data & Business Synergy Section (REPLACES ANALYTICS SECTION) -->
+    <section id="data-business" class="py-20 relative z-10 bg-slate-900/50 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 reveal">
+                <span class="inline-block py-1 px-3 rounded-full bg-emerald-900/30 border border-emerald-500/50 text-emerald-400 text-xs font-bold uppercase tracking-widest mb-4">Quy Trình Chuẩn Hóa</span>
+                <h2 class="text-3xl md:text-4xl font-bold font-serif text-white mb-4">Kiến Tạo Tầng Dữ Liệu: <span class="text-gradient">Data & Business</span></h2>
+                <p class="text-slate-400 max-w-3xl mx-auto">Phá bỏ các "ốc đảo" Excel thủ công. Mô phỏng cách đội ngũ Data hợp tác cùng Business Owner để xây dựng quy trình nhập liệu chuẩn mực, tạo ra tầng dữ liệu "Đúng - Đẹp - Đủ" phục vụ vận hành số.</p>
+            </div>
+
+            <!-- HTML/CSS Flow Diagram -->
+            <div class="relative max-w-6xl mx-auto mb-16">
+                <!-- Connecting Line for Desktop -->
+                <div class="hidden md:block absolute top-[40%] left-[10%] w-[80%] h-1 bg-slate-700 -translate-y-1/2 z-0"></div>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-8 relative z-10">
+                    <!-- Step 1 -->
+                    <div class="glass p-6 rounded-2xl border-t-4 border-red-500 text-center relative reveal hover:-translate-y-2 transition-transform duration-300 bg-[#1e293b]/90">
+                        <div class="w-14 h-14 mx-auto bg-red-500/20 rounded-full flex items-center justify-center text-2xl mb-4 shadow-[0_0_15px_rgba(239,68,68,0.3)]">📄</div>
+                        <h4 class="font-bold text-white mb-2">1. Phá Bỏ Cũ</h4>
+                        <p class="text-xs text-slate-400 mb-4 leading-relaxed">Loại bỏ quy trình nhập liệu rời rạc, các file Excel cá nhân và thói quen quản trị phân mảnh của các phòng ban.</p>
+                        <div class="inline-block px-2 py-1 bg-red-900/30 rounded text-[10px] font-bold text-red-400 border border-red-700/50 mt-auto">Trạng thái hiện tại</div>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="glass p-6 rounded-2xl border-t-4 border-amber-500 text-center relative reveal hover:-translate-y-2 transition-transform duration-300 bg-[#1e293b]/90" style="transition-delay: 100ms;">
+                        <div class="w-14 h-14 mx-auto bg-amber-500/20 rounded-full flex items-center justify-center text-2xl mb-4 shadow-[0_0_15px_rgba(245,158,11,0.3)]">🤝</div>
+                        <h4 class="font-bold text-white mb-2">2. Chuẩn Hóa</h4>
+                        <p class="text-xs text-slate-400 mb-4 leading-relaxed">Định nghĩa "Từ điển dữ liệu", thống nhất quy tắc định dạng và thiết lập quy trình nhập liệu chuẩn trên phần mềm.</p>
+                        <div class="flex justify-center gap-2 mt-auto">
+                            <span class="px-2 py-1 bg-slate-800 rounded text-[10px] font-medium text-emerald-300 border border-slate-600">Data BA</span>
+                            <span class="px-2 py-1 bg-slate-800 rounded text-[10px] font-medium text-amber-300 border border-slate-600">Data Owner</span>
+                        </div>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="glass p-6 rounded-2xl border-t-4 border-blue-500 text-center relative reveal hover:-translate-y-2 transition-transform duration-300 bg-[#1e293b]/90" style="transition-delay: 200ms;">
+                        <div class="w-14 h-14 mx-auto bg-blue-500/20 rounded-full flex items-center justify-center text-2xl mb-4 shadow-[0_0_15px_rgba(59,130,246,0.3)]">⚙️</div>
+                        <h4 class="font-bold text-white mb-2">3. Tự Động Hóa</h4>
+                        <p class="text-xs text-slate-400 mb-4 leading-relaxed">Xây dựng Data Pipeline thu thập tự động dữ liệu sạch từ các nguồn đổ về Kho dữ liệu trung tâm một cách xuyên suốt.</p>
+                        <div class="flex justify-center gap-2 mt-auto">
+                            <span class="px-2 py-1 bg-slate-800 rounded text-[10px] font-medium text-emerald-300 border border-slate-600">Data Eng</span>
+                        </div>
+                    </div>
+
+                    <!-- Step 4 -->
+                    <div class="glass p-6 rounded-2xl border-t-4 border-emerald-500 text-center relative reveal hover:-translate-y-2 transition-transform duration-300 bg-[#1e293b]/90" style="transition-delay: 300ms;">
+                        <div class="w-14 h-14 mx-auto bg-emerald-500/20 rounded-full flex items-center justify-center text-2xl mb-4 shadow-[0_0_15px_rgba(16,185,129,0.3)]">📈</div>
+                        <h4 class="font-bold text-white mb-2">4. Khai Thác Số</h4>
+                        <p class="text-xs text-slate-400 mb-4 leading-relaxed">Business sử dụng các Dashboard Real-time (BI) để ra quyết định, hoàn thiện chu trình vận hành số thực sự.</p>
+                        <div class="flex justify-center gap-2 mt-auto">
+                            <span class="px-2 py-1 bg-slate-800 rounded text-[10px] font-medium text-emerald-300 border border-slate-600">BI Dev</span>
+                            <span class="px-2 py-1 bg-slate-800 rounded text-[10px] font-medium text-amber-300 border border-slate-600">Business</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Explanation Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 reveal mt-12">
+                <div class="glass p-8 rounded-2xl border border-slate-700 bg-gradient-to-br from-slate-800/80 to-slate-900/80">
+                    <h3 class="text-xl font-serif font-bold text-emerald-400 mb-4 flex items-center gap-2"><span>🎯</span> Giá Trị Cốt Lõi (Đúng - Đẹp - Đủ)</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start gap-3">
+                            <div class="mt-1 min-w-[24px] h-6 rounded-full bg-emerald-900/50 flex items-center justify-center text-emerald-400 text-xs font-bold border border-emerald-700/50">1</div>
+                            <div>
+                                <h4 class="text-white font-medium mb-1">Dữ liệu ĐÚNG</h4>
+                                <p class="text-sm text-slate-400 leading-relaxed">Data Owner chịu trách nhiệm định nghĩa logic kinh doanh. Dữ liệu nạp vào hệ thống phải phản ánh đúng bản chất nghiệp vụ thực tế, loại bỏ sự gian lận hoặc sai lệch chủ quan.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <div class="mt-1 min-w-[24px] h-6 rounded-full bg-emerald-900/50 flex items-center justify-center text-emerald-400 text-xs font-bold border border-emerald-700/50">2</div>
+                            <div>
+                                <h4 class="text-white font-medium mb-1">Dữ liệu ĐẸP</h4>
+                                <p class="text-sm text-slate-400 leading-relaxed">Data BA thiết lập chuẩn Schema (Ví dụ: Định dạng ngày tháng ISO, chuẩn hóa ID khách hàng), tạo sự đồng nhất trên toàn hệ sinh thái đa ngành.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <div class="mt-1 min-w-[24px] h-6 rounded-full bg-emerald-900/50 flex items-center justify-center text-emerald-400 text-xs font-bold border border-emerald-700/50">3</div>
+                            <div>
+                                <h4 class="text-white font-medium mb-1">Dữ liệu ĐỦ</h4>
+                                <p class="text-sm text-slate-400 leading-relaxed">Data Engineer xây dựng luồng tự động để không bị sót bất kỳ bản ghi nào từ các nguồn, cập nhật liên tục (Real-time/Batch) thay vì chờ đợi báo cáo gửi tay cuối tháng.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="glass p-8 rounded-2xl border border-slate-700 bg-gradient-to-br from-slate-800/80 to-slate-900/80">
+                    <h3 class="text-xl font-serif font-bold text-amber-400 mb-4 flex items-center gap-2"><span>🚧</span> Thách Thức Khi Chuyển Đổi Vận Hành</h3>
+                    <p class="text-sm text-slate-300 leading-relaxed mb-6">
+                        Việc xây dựng hệ thống phần mềm công nghệ thực chất chỉ chiếm 20% nỗ lực, <strong>80% còn lại nằm ở việc quản trị sự thay đổi thói quen</strong> của con người trong tổ chức.
+                    </p>
+                    <div class="space-y-4">
+                        <div class="p-4 rounded-xl bg-slate-900/50 border-l-4 border-red-500">
+                            <p class="text-sm text-white font-medium mb-1">Chống cự từ người dùng (Resistance)</p>
+                            <p class="text-xs text-slate-400 leading-relaxed">Nhân sự quen dùng Excel vì cảm giác "dễ làm", ngại chuyển sang thao tác trên phần mềm quản trị vì cảm giác bị giám sát liên tục và chặt chẽ.</p>
+                        </div>
+                        <div class="p-4 rounded-xl bg-slate-900/50 border-l-4 border-amber-500">
+                            <p class="text-sm text-white font-medium mb-1">Rác vào - Rác ra (Garbage In, Garbage Out)</p>
+                            <p class="text-xs text-slate-400 leading-relaxed">Nếu khâu Business nhập liệu cẩu thả để "cho xong việc", toàn bộ các Dashboard BI và thuật toán AI dự báo đắt tiền ở tuyến sau sẽ trở nên vô nghĩa.</p>
+                        </div>
+                        <div class="p-4 rounded-xl bg-slate-900/50 border-l-4 border-emerald-500">
+                            <p class="text-sm text-white font-medium mb-1">Giải pháp Cốt lõi</p>
+                            <p class="text-xs text-slate-400 leading-relaxed">Đòi hỏi cam kết quyết liệt từ Ban Lãnh Đạo (BOD) trong việc kiến tạo văn hóa dữ liệu. Thưởng - Phạt phân minh và chỉ ra quyết định dựa trên báo cáo Hệ thống.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTO View & AI Section (NEW) -->
+    <section id="cto-view" class="py-20 relative z-10 bg-[#0b1120] border-t border-slate-800 shadow-[inset_0_20px_40px_rgba(0,0,0,0.5)]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 reveal">
+                <span class="inline-block py-1 px-3 rounded-full bg-violet-900/30 border border-violet-500/50 text-violet-400 text-xs font-bold uppercase tracking-widest mb-4">Góc Nhìn CTO</span>
+                <h2 class="text-3xl md:text-4xl font-bold font-serif text-white mb-4">Kiến Trúc Vận Hành & <span class="text-gradient">Sức Mạnh AI 5x</span></h2>
+                <p class="text-slate-400 max-w-3xl mx-auto">Mô phỏng cách các vị trí phối hợp tạo thành một cỗ máy hoàn chỉnh. Lý giải tại sao sự hỗ trợ của Trí tuệ Nhân tạo (GenAI/Copilot) giúp team 7 người tạo ra khối lượng công việc bằng một phòng IT 30 người theo mô hình cũ.</p>
+            </div>
+
+            <!-- CSS Flow Diagram -->
+            <div class="mb-20 reveal">
+                <h3 class="text-xl font-bold text-slate-300 mb-8 text-center border-b border-slate-800 pb-4">Sơ Đồ Tương Tác: Hợp Đồng Dữ Liệu (API-First Flow)</h3>
+                
+                <div class="flex flex-col md:flex-row items-center justify-between gap-4 w-full">
+                    
+                    <!-- Box 1: Nghiệp vụ -->
+                    <div class="w-full md:w-1/4 glass p-5 rounded-2xl border-t-4 border-amber-500 text-center relative">
+                        <div class="w-12 h-12 mx-auto bg-amber-500/20 rounded-full flex items-center justify-center text-amber-400 text-xl mb-3">👔</div>
+                        <h4 class="font-bold text-white mb-1">Định Nghĩa Bài Toán</h4>
+                        <p class="text-xs text-slate-400 mb-3">Nghiệp vụ & Từ điển dữ liệu</p>
+                        <div class="inline-block px-3 py-1 bg-slate-800 rounded-lg text-xs font-medium text-amber-300 border border-slate-700">Data Owner</div>
+                    </div>
+
+                    <!-- Arrow -->
+                    <div class="hidden md:flex flex-col justify-center items-center px-2 text-emerald-500 opacity-70">
+                        <span class="text-sm font-bold tracking-widest uppercase mb-1">Specs</span>
+                        <div class="text-2xl animate-flow">➔</div>
+                    </div>
+                    <div class="md:hidden text-emerald-500 opacity-70 text-2xl animate-bounce my-2">⬇</div>
+
+                    <!-- Box 2: Data Hub -->
+                    <div class="w-full md:w-1/4 glass p-5 rounded-2xl border-t-4 border-emerald-500 text-center relative z-10 shadow-[0_0_30px_rgba(16,185,129,0.15)]">
+                        <div class="w-12 h-12 mx-auto bg-emerald-500/20 rounded-full flex items-center justify-center text-emerald-400 text-xl mb-3">🗄️</div>
+                        <h4 class="font-bold text-white mb-1">Data Foundation</h4>
+                        <p class="text-xs text-slate-400 mb-3">Airbyte, Postgres Sandbox, dbt</p>
+                        <div class="flex justify-center gap-2">
+                            <div class="px-2 py-1 bg-slate-800 rounded-lg text-xs font-medium text-emerald-300 border border-emerald-900/50">BA</div>
+                            <div class="px-2 py-1 bg-slate-800 rounded-lg text-xs font-medium text-emerald-300 border border-emerald-900/50">Data Eng</div>
+                        </div>
+                    </div>
+
+                    <!-- Arrow -->
+                    <div class="hidden md:flex flex-col justify-center items-center px-2 text-violet-500 opacity-70">
+                        <span class="text-sm font-bold tracking-widest uppercase mb-1">API & DB</span>
+                        <div class="text-2xl animate-flow">➔</div>
+                    </div>
+                    <div class="md:hidden text-violet-500 opacity-70 text-2xl animate-bounce my-2">⬇</div>
+
+                    <!-- Box 3: App Logic -->
+                    <div class="w-full md:w-1/4 glass p-5 rounded-2xl border-t-4 border-violet-500 text-center relative">
+                        <div class="w-12 h-12 mx-auto bg-violet-500/20 rounded-full flex items-center justify-center text-violet-400 text-xl mb-3">⚙️</div>
+                        <h4 class="font-bold text-white mb-1">App Backend & API</h4>
+                        <p class="text-xs text-slate-400 mb-3">RESTful, Logic Vận Hành, Auth</p>
+                        <div class="flex justify-center gap-2">
+                            <div class="px-2 py-1 bg-slate-800 rounded-lg text-xs font-medium text-violet-300 border border-violet-900/50">Backend</div>
+                            <div class="px-2 py-1 bg-slate-800 rounded-lg text-xs font-medium text-violet-300 border border-violet-900/50">DevOps</div>
+                        </div>
+                    </div>
+
+                    <!-- Split Arrows -->
+                    <div class="hidden md:flex flex-col justify-center items-center px-2 text-blue-500 opacity-70">
+                        <div class="text-sm font-bold mb-1">JSON</div>
+                        <div class="text-2xl animate-flow">➔</div>
+                    </div>
+                    <div class="md:hidden text-blue-500 opacity-70 text-2xl animate-bounce my-2">⬇</div>
+
+                    <!-- Box 4: Endpoints -->
+                    <div class="w-full md:w-1/4 flex flex-col gap-4">
+                        <div class="glass p-4 rounded-xl border border-blue-500/30 text-center">
+                            <div class="text-sm font-bold text-white">BOD Dashboards</div>
+                            <p class="text-[10px] text-slate-400 mb-2">PowerBI / DAX</p>
+                            <span class="px-2 py-1 bg-slate-800 rounded text-xs text-blue-300">BI Dev</span>
+                        </div>
+                        <div class="glass p-4 rounded-xl border border-pink-500/30 text-center">
+                            <div class="text-sm font-bold text-white">Super App / Web</div>
+                            <p class="text-[10px] text-slate-400 mb-2">React / UI Components</p>
+                            <span class="px-2 py-1 bg-slate-800 rounded text-xs text-pink-300">Frontend</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI vs Traditional Comparison -->
+            <div class="reveal">
+                <h3 class="text-2xl font-bold font-serif text-white mb-2 text-center">Tại Sao Team Lại Nhanh Hơn 5 Lần?</h3>
+                <p class="text-slate-400 text-center mb-10 text-sm max-w-2xl mx-auto">Ứng dụng GenAI (GitHub Copilot, ChatGPT, Cursor) vào lõi quá trình phát triển giúp loại bỏ hoàn toàn các công việc "thủ công số" (digital boilerplate).</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    
+                    <!-- Compare 1: BA -->
+                    <div class="glass rounded-2xl p-6 relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 p-3 text-slate-600 font-bold opacity-30 text-4xl group-hover:opacity-10 transition-opacity">BA</div>
+                        <h4 class="text-lg font-bold text-white mb-4 border-b border-slate-700 pb-2">Viết Đặc Tả & API Specs</h4>
+                        <div class="flex flex-col gap-4">
+                            <div class="p-4 rounded-lg border-l-2 border-slate-600 bg-slate-800/50">
+                                <p class="text-xs text-slate-400 font-bold uppercase mb-1">Cách Cũ (Không AI)</p>
+                                <p class="text-sm text-slate-300">BA phải gõ tay hàng trăm trang tài liệu Word, thiết kế cấu trúc JSON JSON thủ công, dễ sai sót và mất hàng tuần.</p>
+                            </div>
+                            <div class="p-4 rounded-lg border-l-4 border-brand-glow bg-gradient-to-r from-emerald-900/30 to-transparent">
+                                <p class="text-xs text-brand-glow font-bold uppercase mb-1 flex items-center gap-2"><span>✨</span> Cách Mới (Sức mạnh AI)</p>
+                                <p class="text-sm text-white">BA cung cấp logic nghiệp vụ cho AI, AI lập tức sinh ra chuẩn <strong>OpenAPI/Swagger</strong> và cấu trúc Table Database trong 5 phút. Dev dùng luôn.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Compare 2: Backend -->
+                    <div class="glass rounded-2xl p-6 relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 p-3 text-slate-600 font-bold opacity-30 text-4xl group-hover:opacity-10 transition-opacity">BE</div>
+                        <h4 class="text-lg font-bold text-white mb-4 border-b border-slate-700 pb-2">Code Logic & Database</h4>
+                        <div class="flex flex-col gap-4">
+                            <div class="p-4 rounded-lg border-l-2 border-slate-600 bg-slate-800/50">
+                                <p class="text-xs text-slate-400 font-bold uppercase mb-1">Cách Cũ (Không AI)</p>
+                                <p class="text-sm text-slate-300">Dev tốn 60% thời gian gõ code CRUD cơ bản (Thêm, Sửa, Xóa), tự dò lỗi Regex phức tạp và viết Unit Test nhàm chán.</p>
+                            </div>
+                            <div class="p-4 rounded-lg border-l-4 border-violet-400 bg-gradient-to-r from-violet-900/30 to-transparent">
+                                <p class="text-xs text-violet-400 font-bold uppercase mb-1 flex items-center gap-2"><span>✨</span> Cách Mới (Sức mạnh AI)</p>
+                                <p class="text-sm text-white">Sử dụng <strong>GitHub Copilot</strong>, tự động sinh code boilerplate, tự viết Unit Test. Backend Dev giờ đây đóng vai trò Reviewer và Kiến trúc sư.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Compare 3: Frontend -->
+                    <div class="glass rounded-2xl p-6 relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 p-3 text-slate-600 font-bold opacity-30 text-4xl group-hover:opacity-10 transition-opacity">FE</div>
+                        <h4 class="text-lg font-bold text-white mb-4 border-b border-slate-700 pb-2">Xây Dựng Giao Diện UI/UX</h4>
+                        <div class="flex flex-col gap-4">
+                            <div class="p-4 rounded-lg border-l-2 border-slate-600 bg-slate-800/50">
+                                <p class="text-xs text-slate-400 font-bold uppercase mb-1">Cách Cũ (Không AI)</p>
+                                <p class="text-sm text-slate-300">Cắt HTML/CSS từ thiết kế tốn hàng tuần. Sửa CSS trên các thiết bị Mobile (Responsive) là cực hình.</p>
+                            </div>
+                            <div class="p-4 rounded-lg border-l-4 border-pink-400 bg-gradient-to-r from-pink-900/30 to-transparent">
+                                <p class="text-xs text-pink-400 font-bold uppercase mb-1 flex items-center gap-2"><span>✨</span> Cách Mới (Sức mạnh AI)</p>
+                                <p class="text-sm text-white">Chụp ảnh thiết kế Figma đẩy vào <strong>Claude/Gemini</strong>, lấy thẳng code Tailwind CSS/React chuẩn xác trong 10 giây. Chỉ mất thời gian gắn data.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Compare 4: Data Analytics -->
+                    <div class="glass rounded-2xl p-6 relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 p-3 text-slate-600 font-bold opacity-30 text-4xl group-hover:opacity-10 transition-opacity">DA</div>
+                        <h4 class="text-lg font-bold text-white mb-4 border-b border-slate-700 pb-2">Xử Lý & Truy Vấn Dữ Liệu</h4>
+                        <div class="flex flex-col gap-4">
+                            <div class="p-4 rounded-lg border-l-2 border-slate-600 bg-slate-800/50">
+                                <p class="text-xs text-slate-400 font-bold uppercase mb-1">Cách Cũ (Không AI)</p>
+                                <p class="text-sm text-slate-300">Ngồi hàng giờ viết và tối ưu các câu lệnh SQL JOIN chằng chịt, hoặc đau đầu viết hàm DAX phức tạp cho PowerBI.</p>
+                            </div>
+                            <div class="p-4 rounded-lg border-l-4 border-blue-400 bg-gradient-to-r from-blue-900/30 to-transparent">
+                                <p class="text-xs text-blue-400 font-bold uppercase mb-1 flex items-center gap-2"><span>✨</span> Cách Mới (Sức mạnh AI)</p>
+                                <p class="text-sm text-white">Chat bằng ngôn ngữ tự nhiên: <em>"Lọc doanh thu KCN tháng này so với tháng trước"</em>, AI trả về code SQL/DAX đã được tối ưu hiệu năng ngay lập tức.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Execution Roadmap -->
+    <section id="roadmap" class="py-20 relative z-10 border-t border-slate-800">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 reveal">
+                <h2 class="text-3xl md:text-4xl font-bold font-serif text-white mb-4">Lộ Trình Triển Khai <span class="text-gradient">Tinh Gọn</span></h2>
+                <p class="text-slate-400 max-w-2xl mx-auto">Áp dụng phương pháp API-First để các team có thể chạy song song, không chờ đợi.</p>
+            </div>
+
+            <div class="space-y-8">
+                <!-- Phase 1 -->
+                <div class="glass p-6 md:p-8 rounded-2xl border-l-4 border-emerald-500 flex flex-col md:flex-row gap-6 items-center reveal hover:-translate-y-2 transition-transform duration-300">
+                    <div class="w-full md:w-1/4 text-center md:text-left">
+                        <span class="text-3xl mb-2 block">🏗️</span>
+                        <h4 class="text-xl font-bold font-serif text-white">Giai đoạn 1</h4>
+                        <p class="text-emerald-400 font-medium">Chuẩn Bị Móng</p>
+                    </div>
+                    <div class="w-full md:w-3/4">
+                        <p class="text-slate-300 leading-relaxed mb-4">
+                            Tập trung định nghĩa từ điển dữ liệu. BA viết API Specs. DE dựng Sandbox (Postgres) và hút dữ liệu cũ. Frontend dùng Mock Data để code UI ngay lập tức.
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 bg-slate-800 rounded-full text-xs text-slate-300 border border-slate-700">Data BA</span>
+                            <span class="px-3 py-1 bg-slate-800 rounded-full text-xs text-slate-300 border border-slate-700">Data Engineer</span>
+                            <span class="px-3 py-1 bg-slate-800 rounded-full text-xs text-slate-300 border border-slate-700">Frontend</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Phase 2 -->
+                <div class="glass p-6 md:p-8 rounded-2xl border-l-4 border-amber-500 flex flex-col md:flex-row gap-6 items-center reveal hover:-translate-y-2 transition-transform duration-300">
+                    <div class="w-full md:w-1/4 text-center md:text-left">
+                        <span class="text-3xl mb-2 block">📊</span>
+                        <h4 class="text-xl font-bold font-serif text-white">Giai đoạn 2</h4>
+                        <p class="text-amber-400 font-medium">Xây Trụ Cột</p>
+                    </div>
+                    <div class="w-full md:w-3/4">
+                        <p class="text-slate-300 leading-relaxed mb-4">
+                            BI xử lý dữ liệu thô, đẩy lên PowerBI cho Ban Lãnh Đạo. Backend thiết kế CSDL vận hành và bắt đầu code API thật.
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 bg-slate-800 rounded-full text-xs text-slate-300 border border-slate-700">BI Developer</span>
+                            <span class="px-3 py-1 bg-slate-800 rounded-full text-xs text-slate-300 border border-slate-700">Backend</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Phase 3 -->
+                <div class="glass p-6 md:p-8 rounded-2xl border-l-4 border-violet-500 flex flex-col md:flex-row gap-6 items-center reveal hover:-translate-y-2 transition-transform duration-300">
+                    <div class="w-full md:w-1/4 text-center md:text-left">
+                        <span class="text-3xl mb-2 block">🚀</span>
+                        <h4 class="text-xl font-bold font-serif text-white">Giai đoạn 3</h4>
+                        <p class="text-violet-400 font-medium">Ráp Nối Go-Live</p>
+                    </div>
+                    <div class="w-full md:w-3/4">
+                        <p class="text-slate-300 leading-relaxed mb-4">
+                            Frontend thay Mock Data bằng API thật từ Backend. Khởi chạy luồng dữ liệu 2 chiều từ App về Data Warehouse.
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 bg-slate-800 rounded-full text-xs text-slate-300 border border-slate-700">Full Team</span>
+                            <span class="px-3 py-1 bg-slate-800 rounded-full text-xs text-slate-300 border border-slate-700">DevOps</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 bg-brand-dark py-10 mt-10">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <h2 class="font-serif font-bold text-2xl text-white mb-4">DẠ HỢP</h2>
+            <p class="text-slate-500 text-sm">Thiết kế cho chiến lược chuyển đổi số Data-Centric.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // Data Structure for Roles (UPDATED BUDGETS)
+        const roleData = {
+            'de': {
+                title: 'Data Engineer', 
+                badge: 'Hạ Tầng Dữ Liệu', 
+                badgeColor: 'bg-emerald-500/20 border-emerald-500 text-emerald-300',
+                salary: '12 - 20 Triệu',
+                img: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop', // Data/Server imagery
+                eval: 'Mức lương hơi thấp cho Senior, phù hợp Mid-level. Việc sử dụng Postgres for sandbox là chiến thuật hay để tiết kiệm chi phí MVP, nhưng cần đảm bảo Schema chuẩn hóa để sau này dễ dàng lên Cloud.',
+                resp: [
+                    'Là "thợ ống nước" của hệ thống.',
+                    'Thiết lập Airbyte, quản trị quyền truy cập BigQuery/Azure SQL.',
+                    'Đảm bảo các luồng chạy dữ liệu tự động (pipeline) không đứt gãy.'
+                ],
+                group: 'A'
+            },
+            'ba': {
+                title: 'Data Business Analyst', 
+                badge: 'Hạ Tầng Dữ Liệu', 
+                badgeColor: 'bg-emerald-500/20 border-emerald-500 text-emerald-300',
+                salary: '15 - 25 Triệu',
+                img: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=2015&auto=format&fit=crop', // Analytics/Business imagery
+                eval: 'Đây là <strong class="text-white">"Key Player"</strong> quyết định thành bại của chiến lược. Đóng vai trò quan trọng lúc đầu để định hình cấu trúc dữ liệu theo đúng nghiệp vụ thực tế.',
+                resp: [
+                    'Nghiên cứu tài liệu và quy trình nghiệp vụ.',
+                    'Tạo tài liệu đặc tả API và thiết kế luồng Data.',
+                    'Cầu nối giữa Data Owner và Data Engineer.'
+                ],
+                group: 'A'
+            },
+            'bi': {
+                title: 'BI Developer', 
+                badge: 'Hạ Tầng Dữ Liệu', 
+                badgeColor: 'bg-emerald-500/20 border-emerald-500 text-emerald-300',
+                salary: '15 - 25 Triệu',
+                img: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop', // Dashboards
+                eval: 'Quan trọng trong pha đầu để dựng MVP Dashboard. Cần tư duy thiết kế UI/UX cho báo cáo và khả năng thấu hiểu dữ liệu kinh doanh.',
+                resp: [
+                    'Viết luồng SQL/dbt để nhào nặn dữ liệu thô.',
+                    'Thiết kế giao diện Dashboard trên Power BI.',
+                    'Tính toán Tỷ lệ lấp đầy, Dòng tiền P&L.'
+                ],
+                group: 'A'
+            },
+            'do': {
+                title: 'Data Owner', 
+                badge: 'Quản Trị Chiến Lược', 
+                badgeColor: 'bg-amber-500/20 border-amber-500 text-amber-300',
+                salary: '20 - 25 Triệu', // Updated Budget
+                img: 'https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2070&auto=format&fit=crop', // Leadership meeting
+                eval: 'Được cấp ngân sách rõ ràng để chuyên tâm định nghĩa bài toán. Đóng vai trò quyết định cấu trúc dữ liệu và nghiệm thu kết quả cuối cùng.',
+                resp: [
+                    'Định nghĩa công thức kinh doanh chuẩn xác.',
+                    'Cung cấp và duyệt từ điển dữ liệu (Metadata).',
+                    'Nghiệm thu số liệu Dashboard.'
+                ],
+                group: 'A'
+            },
+            'be': {
+                title: 'Backend Developer', 
+                badge: 'Phát Triển Ứng Dụng', 
+                badgeColor: 'bg-violet-500/20 border-violet-500 text-violet-300',
+                salary: '20 - 25 Triệu', // Updated Budget
+                img: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=2070&auto=format&fit=crop', // Coding
+                eval: 'Ngân sách cạnh tranh để thu hút Dev cứng. Sẽ gánh phần logic nghiệp vụ nặng nhất đằng sau App, yêu cầu kỹ năng tối ưu hóa Database tốt.',
+                resp: [
+                    'Viết các RESTful API và API Gateway.',
+                    'Thiết lập cấu trúc CSDL Vận hành (PostgreSQL).',
+                    'Đảm bảo tốc độ và logic giao dịch của Ứng dụng.'
+                ],
+                group: 'B'
+            },
+            'fe': {
+                title: 'Frontend Developer', 
+                badge: 'Phát Triển Ứng Dụng', 
+                badgeColor: 'bg-violet-500/20 border-violet-500 text-violet-300',
+                salary: '20 - 25 Triệu', // Updated Budget
+                img: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=2072&auto=format&fit=crop', // Web design
+                eval: 'Mức ngân sách đầu tư mạnh cho UX/UI. Không cần đợi API thật, phải chủ động thiết kế dựa trên Mock Data từ bản đặc tả của BA.',
+                resp: [
+                    'Phát triển giao diện cho Super App / Web Portal.',
+                    'Tích hợp API và xử lý trạng thái phía Client.',
+                    'Tối ưu hóa trải nghiệm người dùng (UX/UI).'
+                ],
+                group: 'B'
+            },
+            'devops': {
+                title: 'DevOps / Cloud Eng', 
+                badge: 'Hạ Tầng & Bảo Mật', 
+                badgeColor: 'bg-blue-500/20 border-blue-500 text-blue-300',
+                salary: 'Freelance / Part-time',
+                img: 'https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?q=80&w=2088&auto=format&fit=crop', // Servers
+                eval: 'Khuyến nghị dùng dịch vụ Managed PaaS (như Vercel, Firebase) để tiết kiệm chi phí DevOps full-time trong giai đoạn MVP.',
+                resp: [
+                    'Đảm bảo server chạy ổn định 24/7.',
+                    'Thiết lập luồng tự động đẩy code CI/CD.',
+                    'Quản trị bảo mật và cấu hình Domain.'
+                ],
+                group: 'B'
+            }
+        };
+
+        // DOM Elements
+        const detailTitle = document.getElementById('detail-title');
+        const detailBadge = document.getElementById('detail-badge');
+        const detailSalary = document.getElementById('detail-salary');
+        const detailEval = document.getElementById('detail-eval');
+        const detailResp = document.getElementById('detail-resp');
+        const detailImg = document.getElementById('detail-img');
+
+        // Update Role Logic
+        function updateRole(roleId) {
+            // Update Buttons
+            document.querySelectorAll('.role-btn').forEach(btn => {
+                btn.classList.remove('active', 'active-b');
+            });
+            
+            const selectedBtn = document.getElementById('btn-' + roleId);
+            if(roleData[roleId].group === 'A') {
+                selectedBtn.classList.add('active');
+            } else {
+                selectedBtn.classList.add('active-b');
+            }
+
+            const data = roleData[roleId];
+            
+            // Image Fade Effect
+            detailImg.style.opacity = '0';
+            setTimeout(() => {
+                detailImg.src = data.img;
+                detailImg.style.opacity = '0.6'; // match overlay opacity
+            }, 300);
+
+            // Update Text Data
+            detailTitle.innerText = data.title;
+            detailBadge.className = `inline-block px-3 py-1 rounded-full text-xs font-bold mb-2 backdrop-blur-md ${data.badgeColor}`;
+            detailBadge.innerText = data.badge;
+            detailSalary.innerText = data.salary;
+            detailEval.innerHTML = data.eval;
+            
+            // Rebuild List with Animation
+            detailResp.innerHTML = '';
+            data.resp.forEach((item, index) => {
+                const li = document.createElement('li');
+                li.className = 'flex items-start gap-3 text-slate-300';
+                li.innerHTML = `<span class="text-brand-primary mt-1">✓</span> <span>${item}</span>`;
+                // Add slight delay for each item
+                li.style.animation = `float 0.5s ease-out ${index * 0.1}s forwards`;
+                detailResp.appendChild(li);
+            });
+        }
+
+        // Initialize First Role Data
+        updateRole('de');
+
+        // Setup DOM Actions and Observers
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // Intersection Observer for scroll animations
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+        });
+    </script>
+</body>
+</html>
